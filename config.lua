@@ -11,6 +11,7 @@ Config.EarlyRespawnFine           = false
 Config.EarlyRespawnFineAmount     = 5000
 
 if IsDuplicityVersion() then
+    Config.AutoAdjustDatabaseWithConfigJob = true --if set to true it automaticaly updates the database if any of Config.Job values change
     Config.Job = {
         ['ambulance'] = {
             Label = 'Ambulance',
