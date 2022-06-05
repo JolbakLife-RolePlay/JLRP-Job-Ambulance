@@ -47,8 +47,13 @@ end
 
 RegisterNetEvent('JLRP-Job-Ambulance:onPlayerDistress')
 AddEventHandler('JLRP-Job-Ambulance:onPlayerDistress', function()
+	SyncDeadPlayersWithAmbulancePlayers(source)
+end)
+
+function SyncDeadPlayersWithAmbulancePlayers(source)
 	if deadPlayers[source] then
 		deadPlayers[source] = 'distress'
 		TriggerClientEvent('JLRP-Job-Ambulance:setDeadPlayers', -1, deadPlayers)
 	end
-end)
+end
+

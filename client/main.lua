@@ -245,7 +245,7 @@ function DeathThread()
     end)
 end
 
-egisterNetEvent('esx_ambulancejob:setDeadPlayers')
+RegisterNetEvent('esx_ambulancejob:setDeadPlayers')
 AddEventHandler('esx_ambulancejob:setDeadPlayers', function(_deadPlayers)
 	deadPlayers = _deadPlayers
 

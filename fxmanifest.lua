@@ -13,15 +13,16 @@ version '0.0'
 shared_scripts {
 	'@JLRP-Framework/shared/locale.lua',
 	'@ox_lib/init.lua',
+	'config.lua',
 	'shared/*.lua',
-	'locales/*.lua',
-	'config.lua'
+	'locales/*.lua'
 }
 
 server_scripts {
 	'@oxmysql/lib/MySQL.lua',
     'server/main.lua',
-    'server/commands.lua'
+    'server/commands.lua',
+	'server/MySQL.lua'
 }
 
 client_scripts {
