@@ -5,7 +5,6 @@ RegisterNetEvent(Config.FrameworkEventsName..':playerLoaded')
 AddEventHandler(Config.FrameworkEventsName..':playerLoaded', function(xPlayer)
 	Core.PlayerLoaded = true
     Core.PlayerData = xPlayer
-    print(Core.Table.Dump(Core.PlayerData.job))
 end)
 
 RegisterNetEvent(Config.FrameworkEventsName..':onPlayerLogout')
@@ -50,13 +49,16 @@ AddEventHandler(Config.FrameworkEventsName..':onPlayerDeath', function(data)
 end)
 
 function CanPayFine()
-    local _canPayFine = 'waiting'
-    Core.TriggerServerCallback('JLRP-Job-Ambulance:checkBalance', function(canPay)
-        _canPayFine = canPay
-    end)
-    while type(_canPayFine) == 'string' do Wait(0) end
-    canPayFine = _canPayFine
-    return _canPayFine
+	if Config.EarlyRespawnFine then
+		local _canPayFine = 'waiting'
+		Core.TriggerServerCallback('JLRP-Job-Ambulance:checkBalance', function(canPay)
+			_canPayFine = canPay
+		end)
+		while type(_canPayFine) == 'string' do Wait(0) end
+		canPayFine = _canPayFine
+		return _canPayFine
+	end
+	return false
 end
 
 function StartDeathTimer()
@@ -206,10 +208,10 @@ function RemoveItemsAfterRPDeath()
 
 	CreateThread(function()
 		Core.TriggerServerCallback('JLRP-Job-Ambulance:removeItemsAfterRPDeath', function()
-			local RespawnCoords, ClosestHospital = GetClosestRespawnPoint()
+			local RespawnCoords = GetClosestRespawnPoint()
 
 			DoScreenFadeOut(800)
-			RespawnPed(PlayerPedId(), RespawnCoords, ClosestHospital.heading)
+			RespawnPed(PlayerPedId(), vec(RespawnCoords.x, RespawnCoords.y, RespawnCoords.z), RespawnCoords.h)
 			while not IsScreenFadedOut() do
 			    Wait(0)
 			end
@@ -217,6 +219,40 @@ function RemoveItemsAfterRPDeath()
 			DoScreenFadeIn(800)
 		end)
 	end)
+end
+
+function GetClosestRespawnPoint()
+	local PlyCoords = GetEntityCoords(PlayerPedId())
+	local allHospitals, closestCoords = {}, nil
+
+	for k, v in pairs(Config.Zones) do
+		for l, r in pairs(v.RespawnPoints) do
+			local distance = #(vec(r.x, r.y, r.z) - PlyCoords)
+			table.insert(allHospitals, {k = k, distance = distance})
+			break
+		end
+	end
+
+	table.sort(allHospitals, function(a, b)
+		return a.distance < b.distance
+	end)
+
+	local key = allHospitals[1]
+
+	for k, v in pairs(Config.Zones[key].RespawnPoints) do
+		table.insert(allHospitals, v)
+	end
+
+	key = math.random(#allHospitals)
+
+	closestCoords = {
+		x = allHospitals[key].x,
+		y = allHospitals[key].y,
+		z = allHospitals[key].z,
+		h = allHospitals[key].h
+	}
+
+	return closestCoords
 end
 
 function DeathThread()
@@ -245,8 +281,8 @@ function DeathThread()
     end)
 end
 
-RegisterNetEvent('esx_ambulancejob:setDeadPlayers')
-AddEventHandler('esx_ambulancejob:setDeadPlayers', function(_deadPlayers)
+RegisterNetEvent('JLRP-Job-Ambulance:setDeadPlayers')
+AddEventHandler('JLRP-Job-Ambulance:setDeadPlayers', function(_deadPlayers)
 	deadPlayers = _deadPlayers
 
 	if isOnDuty then
