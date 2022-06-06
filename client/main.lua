@@ -221,6 +221,16 @@ function RemoveItemsAfterRPDeath()
 	end)
 end
 
+function RespawnPed(ped, coords, heading)
+	SetEntityCoordsNoOffset(ped, coords.x, coords.y, coords.z, false, false, false)
+	NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, heading, true, false)
+	SetPlayerInvincible(ped, false)
+	ClearPedBloodDamage(ped)
+
+	TriggerServerEvent(Config.FrameworkEventsName..':onPlayerSpawn')
+	TriggerEvent(Config.FrameworkEventsName..':onPlayerSpawn')
+end
+
 function GetClosestRespawnPoint()
 	local PlyCoords = GetEntityCoords(PlayerPedId())
 	local allHospitals, closestCoords = {}, nil
@@ -310,4 +320,28 @@ AddEventHandler('JLRP-Job-Ambulance:setDeadPlayers', function(_deadPlayers)
 			end
 		end
 	end
+end)
+
+RegisterNetEvent('JLRP-Job-Ambulance:revive')
+AddEventHandler('JLRP-Job-Ambulance:revive', function()
+	local playerPed = PlayerPedId()
+	local coords = GetEntityCoords(playerPed)
+	TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', false)
+
+	DoScreenFadeOut(800)
+
+	while not IsScreenFadedOut() do
+		Wait(50)
+	end
+
+	local formattedCoords = {
+		x = Core.Math.Round(coords.x, 1),
+		y = Core.Math.Round(coords.y, 1),
+		z = Core.Math.Round(coords.z, 1)
+	}
+
+	RespawnPed(playerPed, formattedCoords, 0.0)
+
+	AnimpostfxStop('DeathFailOut')
+	DoScreenFadeIn(800)
 end)

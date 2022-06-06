@@ -13,7 +13,7 @@ Config.EarlyRespawnFineAmount     = 5000
 Config.Zones = {
     {
         HospitalName = 'City Hospital',
-        AuthorizedJobName = {'ambulance'},    
+        AuthorizedJobNames = {'ambulance'},    
         Blip = {
             Enable = true,
             Position = {x = 341.0, y = -1397.3, z = 32.5}
@@ -61,9 +61,15 @@ if IsDuplicityVersion() then
                     Name = 'surgeon',
                     Label = 'Surgeon',
                     Salary = 1200,
-                    AccessToBossMenu = true -- would only work if the framework is JLRP-Framework
+                    AccessToBossMenu = false -- would only work if the framework is JLRP-Framework
                 },
                 ['5'] = {
+                    Name = 'chief', -- make sure the name for the highest rank MUST be 'boss'
+                    Label = 'Chief',
+                    Salary = 1350,
+                    AccessToBossMenu = true -- would only work if the framework is JLRP-Framework
+                },
+                ['6'] = {
                     Name = 'boss', -- make sure the name for the highest rank MUST be 'boss'
                     Label = 'Boss',
                     Salary = 1500,

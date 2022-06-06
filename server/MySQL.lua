@@ -36,13 +36,15 @@ if Config.AutoAdjustDatabaseWithConfigJob then
                     if gradeResult then
                         if FRAMEWORKNAME == 'JLRP-Framework' then
                             if gradeResult.name ~= gradeName or gradeResult.label ~= gradeLabel or gradeResult.is_boss ~= gradeHasAccessToBossMenu or gradeResult.salary ~= gradeSalary then
-                                MySQL.prepare.await('DELETE FROM job_grades WHERE job_name = ? AND grade = ?', { jobName, grade })
-                                MySQL.insert.await('INSERT INTO job_grades (job_name, grade, name, label, is_boss, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { jobName, grade, gradeName, gradeLabel, gradeHasAccessToBossMenu, gradeSalary, '{}', '{}' })
+                                --MySQL.prepare.await('DELETE FROM job_grades WHERE job_name = ? AND grade = ?', { jobName, grade })
+                                --MySQL.insert.await('INSERT INTO job_grades (job_name, grade, name, label, is_boss, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { jobName, grade, gradeName, gradeLabel, gradeHasAccessToBossMenu, gradeSalary, '{}', '{}' })
+                                MySQL.update.await('UPDATE job_grades SET name = ?, label = ?, is_boss = ?, salary = ? WHERE job_name = ? AND grade = ?', { gradeName, gradeLabel, gradeHasAccessToBossMenu, gradeSalary, jobName, grade })
                             end
                         else
                             if gradeResult.name ~= gradeName or gradeResult.label ~= gradeLabel or gradeResult.salary ~= gradeSalary then
-                                MySQL.prepare.await('DELETE FROM job_grades WHERE job_name = ? AND grade = ?', { jobName, grade })
-                                MySQL.insert.await('INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, ?, ?)', { jobName, grade, gradeName, gradeLabel, gradeSalary, '{}', '{}' })
+                                --MySQL.prepare.await('DELETE FROM job_grades WHERE job_name = ? AND grade = ?', { jobName, grade })
+                                --MySQL.insert.await('INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, ?, ?)', { jobName, grade, gradeName, gradeLabel, gradeSalary, '{}', '{}' })
+                                MySQL.update.await('UPDATE job_grades SET name = ?, label = ?, salary = ? WHERE job_name = ? AND grade = ?', { gradeName, gradeLabel, gradeSalary, jobName, grade })
                             end
                         end
                     else

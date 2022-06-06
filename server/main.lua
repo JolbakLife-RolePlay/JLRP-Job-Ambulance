@@ -1,4 +1,5 @@
 local playersHealing, deadPlayers = {}, {}
+OX_INVENTORY = exports['ox_inventory']
 
 Core.RegisterServerCallback('JLRP-Job-Ambulance:getDeathStatus', function(source, cb)
 	local xPlayer = Core.GetPlayerFromId(source)
@@ -47,13 +48,79 @@ end
 
 RegisterNetEvent('JLRP-Job-Ambulance:onPlayerDistress')
 AddEventHandler('JLRP-Job-Ambulance:onPlayerDistress', function()
-	SyncDeadPlayersWithAmbulancePlayers(source)
+	AddTheDeadPlayerToTheList(source, 'distress')
 end)
 
+function AddTheDeadPlayerToTheList(source, state)
+	deadPlayers[source] = state
+	SyncDeadPlayersWithAmbulancePlayers()
+end
+
 function SyncDeadPlayersWithAmbulancePlayers(source)
-	if deadPlayers[source] then
-		deadPlayers[source] = 'distress'
+	if source then
+		TriggerClientEvent('JLRP-Job-Ambulance:setDeadPlayers', source, deadPlayers)
+	else
 		TriggerClientEvent('JLRP-Job-Ambulance:setDeadPlayers', -1, deadPlayers)
 	end
 end
 
+Core.RegisterServerCallback('JLRP-Job-Ambulance:removeItemsAfterRPDeath', function(source, cb)
+	local xPlayer = Core.GetPlayerFromId(source)
+	local isInventoryClear = false
+
+	if Config.RemoveItemsAfterRPDeath then
+		if Config.RemoveCashAfterRPDeath then
+			OX_INVENTORY:ClearInventory(xPlayer.source)
+		else
+			local money = xPlayer.getAccount('money').money
+			local blackMoney= xPlayer.getAccount('black_money').money
+
+			OX_INVENTORY:ClearInventory(xPlayer.source)
+
+			xPlayer.setAccountMoney('money', money)
+			xPlayer.setAccountMoney('black_money', blackMoney)
+		end
+	end
+
+	cb()
+end)
+
+RegisterNetEvent(Config.FrameworkEventsName..':onPlayerDeath')
+AddEventHandler(Config.FrameworkEventsName..':onPlayerDeath', function(data)
+	AddTheDeadPlayerToTheList(source, 'dead')
+end)
+
+AddEventHandler(Config.FrameworkEventsName..':setJob', function(source, job, lastJob)
+	if AuthorizedAmbulanceJobNames[job.name] then
+		SyncDeadPlayersWithAmbulancePlayers(source)
+	end
+end)
+
+RegisterNetEvent(Config.FrameworkEventsName..':onPlayerSpawn')
+AddEventHandler(Config.FrameworkEventsName..':onPlayerSpawn', function()
+	RemoveDeadPlayerFromTheList(source)
+end)
+
+AddEventHandler(Config.FrameworkEventsName..':playerDropped', function(source, reason)
+	RemoveDeadPlayerFromTheList(source)
+end)
+
+function RemoveDeadPlayerFromTheList(source)
+	if deadPlayers[source] then
+		deadPlayers[source] = nil
+		SyncDeadPlayersWithAmbulancePlayers()
+	end
+end
+
+RegisterNetEvent('JLRP-Job-Ambulance:heal')
+AddEventHandler('JLRP-Job-Ambulance:heal', function(target, type)
+	local xPlayer = Core.GetPlayerFromId(source)
+
+	if xPlayer then
+		if AuthorizedAmbulanceJobNames[xPlayer.job.name] then
+			TriggerClientEvent('JLRP-Job-Ambulance:heal', target, type)
+		else
+			DropPlayer(xPlayer.source, "Cheater!")
+		end
+	end
+end)
