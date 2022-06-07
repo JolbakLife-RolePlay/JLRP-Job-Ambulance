@@ -135,7 +135,7 @@ function SendDistressSignal()
 	Core.ShowNotification(_U('distress_sent'))
 	TriggerServerEvent('JLRP-Job-Ambulance:onPlayerDistress')
 
-	Core.SetTimeout(Config.LetPlayerCallHospitalUnitsTimer * 60 * 1000, function()
+	Core.SetTimeout(Config.DistressSignalToHospitalUnitsTimer * 60 * 1000, function()
 		if isDead then StartDistressSignal(timeout) end
 	end)
 end
