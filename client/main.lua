@@ -1,5 +1,5 @@
 local firstSpawn, canPayFine = true, false
-isDead, isSearched, medic, isThreadRunning, isOnDuty = false, false, 0, false, false
+timer, isDead, isSearched, medic, isThreadRunning, isOnDuty = nil, false, false, 0, false, false
 
 RegisterNetEvent(Config.FrameworkEventsName..':playerLoaded')
 AddEventHandler(Config.FrameworkEventsName..':playerLoaded', function(xPlayer)
@@ -35,8 +35,10 @@ end)
 function OnPlayerDeath()
 	isDead = true
 	Core.UI.Menu.CloseAll()
-	TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', true)
-
+	if FRAMEWORKNAME ~= 'JLRP-Framework' then
+		TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', true)
+	end
+	
 	StartDeathTimer()
 	StartDistressSignal() 
 
@@ -61,42 +63,74 @@ function CanPayFine()
 	return false
 end
 
+function NewTimer()
+	local self = {}
+
+	if FRAMEWORKNAME == 'JLRP-Framework' then
+		self.earlySpawnTimer = (Core.PlayerData.metadata.earlyspawntimer and Core.PlayerData.metadata.earlyspawntimer > 0) and Core.PlayerData.metadata.earlyspawntimer or (Core.PlayerData.metadata.earlyspawntimer and Core.PlayerData.metadata.earlyspawntimer == 0 and Core.PlayerData.metadata.bleedouttimer and Core.PlayerData.metadata.bleedouttimer > 0) and 0 or Core.Math.Round(Config.EarlyRespawnTimer * 60)
+		self.bleedoutTimer = (Core.PlayerData.metadata.bleedouttimer and Core.PlayerData.metadata.bleedouttimer > 0) and Core.PlayerData.metadata.bleedouttimer or Core.Math.Round(Config.BleedoutTimer * 60)
+	else
+		self.earlySpawnTimer = Core.Math.Round(Config.EarlyRespawnTimer * 60)
+		self.bleedoutTimer = Core.Math.Round(Config.BleedoutTimer * 60)
+	end
+
+	return self
+end
+
 function StartDeathTimer()
+	
+	timer = NewTimer()
+	
+	LocalPlayer.state:set('earlySpawnTimer', timer.earlySpawnTimer, true)
+	LocalPlayer.state:set('bleedoutTimer', timer.bleedoutTimer, true)
 
 	if Config.EarlyRespawnFine then
 		CanPayFine()
 	end
 
-	local earlySpawnTimer = Core.Math.Round((Config.EarlyRespawnTimer * 1000 * 60) / 1000)
-	local bleedoutTimer = Core.Math.Round((Config.BleedoutTimer * 1000 * 60) / 1000)
-
 	CreateThread(function()
 		-- early respawn timer
-		while earlySpawnTimer > 0 and isDead do
+		local loop = 0
+		while timer.earlySpawnTimer > 0 and isDead do
 			Wait(1000)
-
-			if earlySpawnTimer > 0 then
-				earlySpawnTimer = earlySpawnTimer - 1
+			loop = loop + 1
+			if timer.earlySpawnTimer > 0 then
+				timer.earlySpawnTimer = timer.earlySpawnTimer - 1
+			end
+			if loop >= 10 then
+				loop = 0
+				LocalPlayer.state:set('earlySpawnTimer', timer.earlySpawnTimer, true)
 			end
 		end
+		timer.earlySpawnTimer = 0
+		LocalPlayer.state:set('earlySpawnTimer', timer.earlySpawnTimer, true)
 
+		loop = 0
 		-- bleedout timer
-		while bleedoutTimer > 0 and isDead do
+		while timer.bleedoutTimer > 0 and isDead do
 			Wait(1000)
-
-			if bleedoutTimer > 0 then
-				bleedoutTimer = bleedoutTimer - 1
+			loop = loop + 1
+			if timer.bleedoutTimer > 0 then
+				timer.bleedoutTimer = timer.bleedoutTimer - 1
+			end
+			if loop >= 10 then
+				loop = 0
+				LocalPlayer.state:set('bleedoutTimer', timer.bleedoutTimer, true)
 			end
 		end
+		timer.bleedoutTimer = 0
+		LocalPlayer.state:set('bleedoutTimer', timer.bleedoutTimer, true)
+
+		if FRAMEWORKNAME == 'JLRP-Framework' then saveRemainingDeathTimer() end
 	end)
 
 	CreateThread(function()
 		local text, timeHeld
 
 		-- early respawn timer
-		while earlySpawnTimer > 0 and isDead do
+		while timer.earlySpawnTimer > 0 and isDead do
 			Wait(0)
-			text = _U('respawn_available_in', secondsToClock(earlySpawnTimer))
+			text = _U('respawn_available_in', secondsToClock(timer.earlySpawnTimer))
 
 			DrawGenericTextThisFrame()
 			BeginTextCommandDisplayText('STRING')
@@ -105,9 +139,9 @@ function StartDeathTimer()
 		end
 
 		-- bleedout timer
-		while bleedoutTimer > 0 and isDead do
+		while timer.bleedoutTimer > 0 and isDead do
 			Wait(0)
-			text = _U('respawn_bleedout_in', secondsToClock(bleedoutTimer))
+			text = _U('respawn_bleedout_in', secondsToClock(timer.bleedoutTimer))
 
 			if not Config.EarlyRespawnFine then
 				text = text .. _U('respawn_bleedout_prompt')
@@ -139,7 +173,7 @@ function StartDeathTimer()
 			EndTextCommandDisplayText(0.5, 0.8)
 		end
 
-		if bleedoutTimer < 1 and isDead then
+		if timer.bleedoutTimer < 1 and isDead then
 			RemoveItemsAfterRPDeath()
 		end
 	end)
@@ -203,8 +237,44 @@ function secondsToClock(seconds)
 	end
 end
 
+function GetClosestRespawnPoint()
+	local PlyCoords = GetEntityCoords(PlayerPedId())
+	local allHospitals, closestCoords = {}, nil
+
+	for k, v in pairs(Config.Zones) do
+		for l, r in pairs(v.RespawnPoints) do
+			local distance = #(vec(r.x, r.y, r.z) - PlyCoords)
+			table.insert(allHospitals, {k = k, distance = distance})
+		end
+	end
+
+	table.sort(allHospitals, function(a, b)
+		return a.distance < b.distance
+	end)
+
+	local key = allHospitals[1].k
+	allHospitals = {}
+
+	for k, v in pairs(Config.Zones[key].RespawnPoints) do
+		table.insert(allHospitals, v)
+	end
+
+	key = math.random(#allHospitals)
+
+	closestCoords = {
+		x = allHospitals[key].x,
+		y = allHospitals[key].y,
+		z = allHospitals[key].z,
+		h = allHospitals[key].h
+	}
+
+	return closestCoords
+end
+
 function RemoveItemsAfterRPDeath()
-	TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', false)
+	if FRAMEWORKNAME ~= 'JLRP-Framework' then
+		TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', false)
+	end
 
 	CreateThread(function()
 		Core.TriggerServerCallback('JLRP-Job-Ambulance:removeItemsAfterRPDeath', function()
@@ -229,40 +299,6 @@ function RespawnPed(ped, coords, heading)
 
 	TriggerServerEvent(Config.FrameworkEventsName..':onPlayerSpawn')
 	TriggerEvent(Config.FrameworkEventsName..':onPlayerSpawn')
-end
-
-function GetClosestRespawnPoint()
-	local PlyCoords = GetEntityCoords(PlayerPedId())
-	local allHospitals, closestCoords = {}, nil
-
-	for k, v in pairs(Config.Zones) do
-		for l, r in pairs(v.RespawnPoints) do
-			local distance = #(vec(r.x, r.y, r.z) - PlyCoords)
-			table.insert(allHospitals, {k = k, distance = distance})
-			break
-		end
-	end
-
-	table.sort(allHospitals, function(a, b)
-		return a.distance < b.distance
-	end)
-
-	local key = allHospitals[1]
-
-	for k, v in pairs(Config.Zones[key].RespawnPoints) do
-		table.insert(allHospitals, v)
-	end
-
-	key = math.random(#allHospitals)
-
-	closestCoords = {
-		x = allHospitals[key].x,
-		y = allHospitals[key].y,
-		z = allHospitals[key].z,
-		h = allHospitals[key].h
-	}
-
-	return closestCoords
 end
 
 function DeathThread()
@@ -326,7 +362,9 @@ RegisterNetEvent('JLRP-Job-Ambulance:revive')
 AddEventHandler('JLRP-Job-Ambulance:revive', function()
 	local playerPed = PlayerPedId()
 	local coords = GetEntityCoords(playerPed)
-	TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', false)
+	if FRAMEWORKNAME ~= 'JLRP-Framework' then
+		TriggerServerEvent('JLRP-Job-Ambulance:setDeathStatus', false)
+	end
 
 	DoScreenFadeOut(800)
 
@@ -345,3 +383,32 @@ AddEventHandler('JLRP-Job-Ambulance:revive', function()
 	AnimpostfxStop('DeathFailOut')
 	DoScreenFadeIn(800)
 end)
+
+if FRAMEWORKNAME == 'JLRP-Framework' then
+	AddEventHandler('onResourceStop', function(resource)
+		if resource == RESOURCENAME then
+			saveRemainingDeathTimer()
+		end
+	end)
+	
+	AddEventHandler('onClientResourceStop', function(resource)
+		if resource == RESOURCENAME then
+			saveRemainingDeathTimer()
+		end
+	end)
+	
+	function saveRemainingDeathTimer()
+		if timer == nil then
+			timer = {}
+			timer.earlySpawnTimer = 0
+			timer.bleedoutTimer = 0
+		end
+		--print(timer.earlySpawnTimer, timer.bleedoutTimer)
+		TriggerServerEvent('JLRP-Job-Ambulance:saveDeathTimer', timer)
+	end
+end
+
+RegisterCommand("timer", function()
+    saveRemainingDeathTimer()
+end, false --[[this command is not restricted, everyone can use this.]])
+

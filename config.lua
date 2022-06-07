@@ -3,12 +3,25 @@ Config.Locale = 'en'
 
 Config.FrameworkEventsName = 'JLRP-Framework' -- if your framework events name are like 'esx:onPlayerSpawn', write 'esx' for Config.FrameworkEventsName
 
-Config.EarlyRespawnTimer          = 1  -- time(minute) til respawn is available
-Config.BleedoutTimer              = 10 -- time(minute) til the player bleeds out
+Config.EarlyRespawnTimer = 1  -- time(minute) til respawn is available
+Config.BleedoutTimer = 10 -- time(minute) til the player bleeds out
 
 -- Let the player pay for respawning early, only if he can afford it.
-Config.EarlyRespawnFine           = true
-Config.EarlyRespawnFineAmount     = 5000
+Config.EarlyRespawnFine = true
+Config.EarlyRespawnFineAmount = 5000
+Config.EarlyRespawnFineMoneyType = 'money' -- valid values : 'money or 'bank' or 'black_money'(not suggested)
+
+Config.RemoveItemsAfterRPDeath = true
+
+Config.RemoveItemsAfterRPDeath = true
+Config.FilteredItems = {
+    {
+        Name = 'id_card', -- name of the item that won't be deleted after Config.RemoveItemsAfterRPDeath is set to true
+        Metadata = {}, -- if the item has a certain metadata
+        Job = {} -- if included any, after Config.RemoveItemsAfterRPDeath is set to true, only the players that have these job(s) will have the item still with them if have one
+    }
+}
+Config.RemoveCashAfterRPDeath = false
 
 Config.Zones = {
     {
