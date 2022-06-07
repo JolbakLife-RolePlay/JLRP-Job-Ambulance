@@ -3,8 +3,9 @@ Config.Locale = 'en'
 
 Config.FrameworkEventsName = 'JLRP-Framework' -- if your framework events name are like 'esx:onPlayerSpawn', write 'esx' for Config.FrameworkEventsName
 
-Config.EarlyRespawnTimer = 1  -- time(minute) til respawn is available
-Config.BleedoutTimer = 10 -- time(minute) til the player bleeds out
+Config.EarlyRespawnTimer = 1  -- time(minute) till respawn is available
+Config.BleedoutTimer = 10 -- time(minute) till the player bleeds out
+Config.DistressSignalToHospitalUnitsTimer = 1 -- time(minute) till the player can again send distress signal to available hospital units
 
 -- Let the player pay for respawning early, only if he can afford it.
 Config.EarlyRespawnFine = true
@@ -14,6 +15,7 @@ Config.EarlyRespawnFineMoneyType = 'money' -- valid values : 'money or 'bank' or
 Config.RemoveItemsAfterRPDeath = true
 
 Config.RemoveItemsAfterRPDeath = true
+--[[ DON'T UNCOMMENT FOR NOW. WAITING FOR OX_INVENTORY TO BRING THIS FEATURE IN ClearInventory(inv, keep)
 Config.FilteredItems = {
     {
         Name = 'id_card', -- name of the item that won't be deleted after Config.RemoveItemsAfterRPDeath is set to true
@@ -21,6 +23,7 @@ Config.FilteredItems = {
         Job = {} -- if included any, after Config.RemoveItemsAfterRPDeath is set to true, only the players that have these job(s) will have the item still with them if have one
     }
 }
+]]
 Config.RemoveCashAfterRPDeath = false
 
 Config.Zones = {
