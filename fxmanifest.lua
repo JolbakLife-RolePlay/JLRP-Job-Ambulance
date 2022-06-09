@@ -28,7 +28,8 @@ server_scripts {
 client_scripts {
 	'@PolyZone/client.lua',
 	'@PolyZone/CircleZone.lua',
-	'client/main.lua'
+	'client/main.lua',
+	'client/job.lua'
 }
 
 dependencies {

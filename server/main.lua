@@ -193,3 +193,48 @@ function SaveTimer(source, timer)
 		xPlayer.setMetadata('bleedouttimer', timer.bleedoutTimer, true)
 	end
 end
+
+RegisterServerEvent('JLRP-Job-Ambulance:goOnDuty')
+AddEventHandler('JLRP-Job-Ambulance:goOnDuty', function()
+    local _source = source
+    local xPlayer = Core.GetPlayerFromId(_source)
+	if xPlayer then
+		if xPlayer.getDuty() == true then xPlayer.showNotification(_U('already_onduty')) return end
+		local name = xPlayer.getName()
+		if AuthorizedAmbulanceJobNames[xPlayer.getJob().name] then
+			xPlayer.setDuty(true)
+			local jobName = xPlayer.getJob().name
+			local xPlayers = Core.GetExtendedPlayers('job', jobName)
+			for _, player in pairs(xPlayers) do
+				if player.getDuty() == true then
+					player.showNotification(_U('on_duty', name, jobName))
+				end
+			end
+		else
+			DropPlayer(xPlayer.source, 'Possible Cheater!')
+		end
+	end
+end)
+
+RegisterServerEvent('JLRP-Job-Ambulance:goOffDuty')
+AddEventHandler('JLRP-Job-Ambulance:goOffDuty', function()
+    local _source = source
+    local xPlayer = Core.GetPlayerFromId(_source)
+	if xPlayer then
+		if xPlayer.getDuty() == false then xPlayer.showNotification(_U('already_offduty')) return end
+		local name = xPlayer.getName()
+		if AuthorizedAmbulanceJobNames[xPlayer.getJob().name] then
+			xPlayer.setDuty(false)
+			xPlayer.showNotification(_U('off_duty', name, jobName))
+			local jobName = xPlayer.getJob().name
+			local xPlayers = Core.GetExtendedPlayers('job', jobName)
+			for _, player in pairs(xPlayers) do
+				if player.getDuty() == true then
+					player.showNotification(_U('off_duty', name, jobName))
+				end
+			end
+		else
+			DropPlayer(xPlayer.source, 'Possible Cheater!')
+		end
+	end
+end)

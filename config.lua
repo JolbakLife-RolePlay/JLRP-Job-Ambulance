@@ -3,6 +3,11 @@ Config.Locale = 'en'
 
 Config.FrameworkEventsName = 'JLRP-Framework' -- if your framework events name are like 'esx:onPlayerSpawn', write 'esx' for Config.FrameworkEventsName
 
+Config.TextUI = 'ox_lib' -- valid values: 'jlrp' or 'ox_lib' or 'esx'
+Config.Notification = 'jlrp' -- valid values: 'jlrp' or 'ox_lib' or 'esx'
+Config.ProgressBar = 'ox_lib' -- valid values: 'jlrp' or 'ox_lib' or 'esx'
+Config.MenuAlignment = 'right'
+
 Config.EarlyRespawnTimer = 1  -- time(minute) till respawn is available
 Config.BleedoutTimer = 10 -- time(minute) till the player bleeds out
 Config.DistressSignalToHospitalUnitsTimer = 1 -- time(minute) till the player can again send distress signal to available hospital units
@@ -11,8 +16,6 @@ Config.DistressSignalToHospitalUnitsTimer = 1 -- time(minute) till the player ca
 Config.EarlyRespawnFine = true
 Config.EarlyRespawnFineAmount = 5000
 Config.EarlyRespawnFineMoneyType = 'money' -- valid values : 'money or 'bank' or 'black_money'(not suggested)
-
-Config.RemoveItemsAfterRPDeath = true
 
 Config.RemoveItemsAfterRPDeath = true
 --[[ DON'T UNCOMMENT FOR NOW. WAITING FOR OX_INVENTORY TO BRING THIS FEATURE IN ClearInventory(inv, keep)
@@ -32,12 +35,28 @@ Config.Zones = {
         AuthorizedJobNames = {'ambulance'},    
         Blip = {
             Enable = true,
-            Position = {x = 341.0, y = -1397.3, z = 32.5}
+            Type = 326,
+            Colour = 0,
+            Size = 1.0,
+            Position = {x = 340.67, y = -586.21, z = 30.66}
+        },
+        Markers = {
+            BossAction = {
+                Enable = true,
+                MarkerPositions = {
+                    {x = 334.61, y = -594.34, z = 43.2}
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 255, g = 50, b = 50},
+                MarkerDrawDistance = 5.0,
+                MarkerType = 22,
+                EnableSecondaryMarker = false,
+            },
         },
         OnOffDutyPositions = {
             {x = 341.0, y = -1397.3, z = 32.5}
         },
-        RespawnPoints = {
+        RespawnPositions = {
             {x = 341.0, y = -1397.3, z = 32.5, h = 48.5}
         }
     }
