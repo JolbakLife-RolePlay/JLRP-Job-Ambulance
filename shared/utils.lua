@@ -61,6 +61,8 @@ else
             local message = '[E]'
             if reason == 'open_boss_menu' then
                 message = _U('open_boss_menu', extra.hospital_name)
+            elseif reason == 'open_pharmacy_menu' then
+                message = _U('open_pharmacy_menu', extra.hospital_name)
             end
             if Config.TextUI == 'jlrp' or Config.TextUI == 'esx' then
                 Core.TextUI(message, type)

@@ -25,7 +25,7 @@ do
 				local zone = CircleZone:Create(vec(n.x, n.y, n.z), action.MarkerDrawDistance, {
 					name = RESOURCENAME..":"..v.HospitalName..":CircleZone:"..tostring(n),
 					useZ = true,
-					debugPoly = false
+					debugPoly = true
 				})
 				
 				points[zone] = {point = zone:getCenter(), zone = action, isInZone = false, type = k, name = v.HospitalName}
@@ -82,14 +82,18 @@ function RunThread()
 									if not isTextUIShown then
 										if v.type == 'BossAction' then
 											TextUI('show', 'open_boss_menu', {hospital_name = v.name})
+										elseif v.type == 'Pharmacy' then
+											TextUI('show', 'open_pharmacy_menu', {hospital_name = v.name})
 										end
 										isTextUIShown = true
 										textUIIsBeingShownInK = k
 									end
 									if IsControlJustReleased(0, 38) and not IsPedFatallyInjured(PlayerPed) then
 										if v.type == 'BossAction' then
-
-										end     
+											
+										elseif v.type == 'Pharmacy' then
+											
+										end   
 									end
 								else
 									if isTextUIShown and textUIIsBeingShownInK and textUIIsBeingShownInK == k then
@@ -113,86 +117,44 @@ function RunThread()
     end
 end
 
-do
-	exports['qtarget']:AddBoxZone("AmbulanceDuty1", vector3(350.411, -587.646, 28.7), 0.4, 0.5, { --Lower Floor
-		name = "AmbulanceDuty1",
-		heading = 287.016,
-		debugPoly = false,
-		minZ = 28.5,
-		maxZ = 28.90
-		}, {
-			options = {
-				{
-					event = "JLRP-Job-Ambulance:goOnDuty",
-					icon = "far fa-clipboard",
-					label = "On Duty",
-				},
-				{
-					event = "JLRP-Job-Ambulance:goOffDuty",
-					icon = "far fa-clipboard",
-					label = "Off Duty",
-				},
-			},
-			job = AuthorizedAmbulanceJobNames,
-			distance = 1.5
-		}
-	)
-	
-	exports['qtarget']:AddBoxZone("AmbulanceDuty2", vector3(307.544, -595.23, 43.1), 0.4, 0.5, { --Main Floor
-		name = "AmbulanceDuty2",
-		heading = 76.5,
-		debugPoly = false,
-		minZ = 42.9,
-		maxZ = 43.3
-		}, {
-			options = {
-				{
-					event = "JLRP-Job-Ambulance:goOnDuty",
-					icon = "far fa-clipboard",
-					label = "On Duty",
-				},
-				{
-					event = "JLRP-Job-Ambulance:goOffDuty",
-					icon = "far fa-clipboard",
-					label = "Off Duty",
-				},
-			},
-			job = AuthorizedAmbulanceJobNames,
-			distance = 1.5
-		}
-	)
-	
-	exports['qtarget']:AddBoxZone("AmbulanceDuty3", vector3(311.917, -593.36, 43.1), 0.4, 0.5, { --Main Floor
-		name = "AmbulanceDuty3",
-		heading = 346.633,
-		debugPoly = false,
-		minZ = 42.9,
-		maxZ = 43.3
-		}, {
-			options = {
-				{
-					event = "JLRP-Job-Ambulance:goOnDuty",
-					icon = "far fa-clipboard",
-					label = "On Duty",
-				},
-				{
-					event = "JLRP-Job-Ambulance:goOffDuty",
-					icon = "far fa-clipboard",
-					label = "Off Duty",
-				},
-			},
-			job = AuthorizedAmbulanceJobNames,
-			distance = 1.5
-		}
-	)
+if Config.Qtarget == true then
+	if GetResourceState('qtarget') == 'missing' then print('Q-Target Needs To Installed!') Config.Qtarget = false return end
+	while GetResourceState('qtarget') ~= 'started' do Wait(100) end
+	local qtarget = exports['qtarget']
+	for _, v in pairs(Config.Zones) do
+		for _, p in pairs(v.OnOffDutyPositions) do
+			local name = RESOURCENAME..":"..tostring(v)..":qtarget:"..tostring(p)
+			qtarget:AddBoxZone(name, vec(p.x, p.y, p.z), 0.5, 0.5, {
+				name = name,
+				heading = p.h,
+				debugPoly = false,
+				minZ = p.z - 0.2,
+				maxZ = p.z + 0.2
+				}, {
+					options = {
+						{
+							event = "JLRP-Job-Ambulance:goOnDuty",
+							icon = "far fa-clipboard",
+							label = "On Duty",
+						},
+						{
+							event = "JLRP-Job-Ambulance:goOffDuty",
+							icon = "far fa-clipboard",
+							label = "Off Duty",
+						},
+					},
+					job = AuthorizedAmbulanceJobNames,
+					distance = 1.5
+				}
+			)
+		end
+	end
 end
 
-RegisterNetEvent('JLRP-Job-Ambulance:goOnDuty')
 AddEventHandler('JLRP-Job-Ambulance:goOnDuty', function()
   TriggerServerEvent('JLRP-Job-Ambulance:goOnDuty')
 end)
 
-RegisterNetEvent('JLRP-Job-Ambulance:goOffDuty')
 AddEventHandler('JLRP-Job-Ambulance:goOffDuty', function()
   TriggerServerEvent('JLRP-Job-Ambulance:goOffDuty')
 end)

@@ -29,6 +29,8 @@ Config.FilteredItems = {
 ]]
 Config.RemoveCashAfterRPDeath = false
 
+Config.Qtarget = true
+
 Config.Zones = {
     {
         HospitalName = 'City Hospital',
@@ -52,9 +54,36 @@ Config.Zones = {
                 MarkerType = 22,
                 EnableSecondaryMarker = false,
             },
+            Pharmacy = {
+                Enable = true,
+                MarkerPositions = {
+                    {x = 359.02, y = -603.26, z = 43.28},
+                    {x = 309.58, y = -561.54, z = 43.28}
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 50, g = 50, b = 255},
+                MarkerDrawDistance = 10.0,
+                MarkerType = 20,
+                EnableSecondaryMarker = false,
+            },
+            CloakRoom = {
+                Enable = true,
+                MarkerPositions = {                  
+                    {x = 307.544, y = -595.23, z = 43.1},
+                    {x = 311.917, y = -593.36, z = 43.1},
+                    {x = 350.411, y = -587.646, z = 28.7}
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 50, g = 50, b = 255},
+                MarkerDrawDistance = 10.0,
+                MarkerType = 20,
+                EnableSecondaryMarker = false,
+            },
         },
         OnOffDutyPositions = {
-            {x = 341.0, y = -1397.3, z = 32.5}
+            {x = 307.544, y = -595.23, z = 43.1, h = 76.5},
+            {x = 311.917, y = -593.36, z = 43.1, h = 346.633},
+            {x = 350.411, y = -587.646, z = 28.7, h = 287.016}
         },
         RespawnPositions = {
             {x = 341.0, y = -1397.3, z = 32.5, h = 48.5}
@@ -76,7 +105,7 @@ if IsDuplicityVersion() then
                 },
                 ['1'] = {
                     Name = 'medic',
-                    Label = 'Medic',
+                    Label = 'Medic', 
                     Salary = 400,
                     AccessToBossMenu = false -- would only work if the framework is JLRP-Framework
                 },

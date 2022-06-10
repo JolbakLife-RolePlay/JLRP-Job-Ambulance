@@ -412,7 +412,7 @@ local firstTrigger = true
 function loadPlayerData()
 	if firstTrigger then
 		firstTrigger = false
-		while not Core.IsPlayerLoaded() do
+		while not Core or not Core.IsPlayerLoaded() do
 			Wait(100)
 		end
 		Core.PlayerLoaded = true

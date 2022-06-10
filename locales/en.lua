@@ -8,6 +8,7 @@ Locales['en'] = {
     ['respawn_bleedout_fine_msg'] = 'You paid $%s to respawn.',
 
     ['open_boss_menu'] = '[E] - Open %s\'s Boss Menu',
+    ['open_pharmacy_menu'] = '[E] - Open %s\'s Pharmacy Menu',
 
     ['on_duty'] = '%s is now On-Duty as a %s',
     ['off_duty'] = '%s is now Off-Duty as a %s',
