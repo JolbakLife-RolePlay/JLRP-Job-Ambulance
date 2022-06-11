@@ -37,7 +37,7 @@ Config.Zones = {
         AuthorizedJobNames = {'ambulance'},    
         Blip = {
             Enable = true,
-            Type = 326,
+            Type = 61,
             Colour = 0,
             Size = 1.0,
             Position = {x = 340.67, y = -586.21, z = 30.66}
@@ -67,15 +67,25 @@ Config.Zones = {
                 EnableSecondaryMarker = false,
             },
             CloakRoom = {
-                Enable = true,
+                Enable = false,
                 MarkerPositions = {                  
-                    {x = 307.544, y = -595.23, z = 43.1},
-                    {x = 311.917, y = -593.36, z = 43.1},
-                    {x = 350.411, y = -587.646, z = 28.7}
+                    {x = 298.85, y = -598.41, z = 43.28},
+                    {x = 301.75, y = -599.28, z = 43.28}
                 },
                 MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
                 MarkerRGB = {r = 50, g = 50, b = 255},
-                MarkerDrawDistance = 10.0,
+                MarkerDrawDistance = 5.0,
+                MarkerType = 20,
+                EnableSecondaryMarker = false,
+            },
+            Inventory = {
+                Enable = true,
+                MarkerPositions = {                  
+                    {x = 306.83, y = -601.61, z = 43.28},
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 255, g = 0, b = 255},
+                MarkerDrawDistance = 6.0,
                 MarkerType = 20,
                 EnableSecondaryMarker = false,
             },

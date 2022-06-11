@@ -225,8 +225,8 @@ AddEventHandler('JLRP-Job-Ambulance:goOffDuty', function()
 		local name = xPlayer.getName()
 		if AuthorizedAmbulanceJobNames[xPlayer.getJob().name] then
 			xPlayer.setDuty(false)
-			xPlayer.showNotification(_U('off_duty', name, jobName))
 			local jobName = xPlayer.getJob().name
+			xPlayer.showNotification(_U('off_duty', name, jobName))
 			local xPlayers = Core.GetExtendedPlayers('job', jobName)
 			for _, player in pairs(xPlayers) do
 				if player.getDuty() == true then
@@ -238,3 +238,55 @@ AddEventHandler('JLRP-Job-Ambulance:goOffDuty', function()
 		end
 	end
 end)
+
+RegisterNetEvent('JLRP-Job-Ambulance:giveItem')
+AddEventHandler('JLRP-Job-Ambulance:giveItem', function(itemName, amount)
+	local xPlayer = Core.GetPlayerFromId(source)
+
+	if xPlayer then
+		local job = xPlayer.getJob()
+		if not AuthorizedAmbulanceJobNames[job.name] or job.onDuty == false then
+			print(('[JLRP-Job-Ambulance] [^2INFO^7] "%s" attempted to add %s %s while not being onDuty!'):format(FRAMEWORKNAME == 'JLRP-Framework' and xPlayer.citizenid or xPlayer.identifier, amount, itemName))
+			return
+		elseif (itemName ~= 'medikit' and itemName ~= 'bandage') then
+			print(('[JLRP-Job-Ambulance] [^2INFO^7] "%s" attempted to add invalid %s %s!'):format(FRAMEWORKNAME == 'JLRP-Framework' and xPlayer.citizenid or xPlayer.identifier, amount, itemName))
+			return
+		end
+	
+		if xPlayer.canCarryItem(itemName, amount) then
+			xPlayer.addInventoryItem(itemName, amount)
+		else
+			xPlayer.showNotification(_U('max_item'))
+		end
+	end
+end)
+
+RegisterNetEvent('JLRP-Job-Ambulance:removeItem')
+AddEventHandler('JLRP-Job-Ambulance:removeItem', function(item)
+	local xPlayer = Core.GetPlayerFromId(source)
+	xPlayer.removeInventoryItem(item, 1)
+
+	if item == 'bandage' then
+		xPlayer.showNotification(_U('used_bandage'))
+	elseif item == 'medikit' then
+		xPlayer.showNotification(_U('used_medikit'))
+	end
+end)
+
+Core.RegisterServerCallback('JLRP-Job-Ambulance:getItemAmount', function(source, cb, item)
+	local xPlayer = Core.GetPlayerFromId(source)
+	local quantity = xPlayer.getInventoryItem(item).count
+
+	cb(quantity)
+end)
+
+RegisterServerEvent('JLRP-Job-Ambulance:svsearch')
+AddEventHandler('JLRP-Job-Ambulance:svsearch', function()
+  TriggerClientEvent('JLRP-Job-Ambulance:clsearch', -1, source)
+end)
+
+if GetResourceState("esx_society") ~= 'missing' then
+	for k, _ in pairs(AuthorizedAmbulanceJobNames) do
+		TriggerEvent('esx_society:registerSociety', AuthorizedAmbulanceJobNames[k], Config.Job[AuthorizedAmbulanceJobNames[k]].Label, 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], {type = 'public'})
+	end
+end

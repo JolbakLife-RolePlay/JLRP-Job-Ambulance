@@ -59,11 +59,7 @@ else
     function TextUI(type, reason, extra)
         if type == 'show' then
             local message = '[E]'
-            if reason == 'open_boss_menu' then
-                message = _U('open_boss_menu', extra.hospital_name)
-            elseif reason == 'open_pharmacy_menu' then
-                message = _U('open_pharmacy_menu', extra.hospital_name)
-            end
+            if reason then message = _U(reason, extra.hospital_name) end
             if Config.TextUI == 'jlrp' or Config.TextUI == 'esx' then
                 Core.TextUI(message, type)
             elseif Config.TextUI == 'ox_lib' then

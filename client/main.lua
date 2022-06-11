@@ -1,6 +1,6 @@
-firstSpawn, canPayFine, shouldDistressShown, text = true, false, true
-timer, isDead, isSearched, medic, isThreadRunning, isOnDuty = nil, false, false, 0, false, false
-deadPlayerBlips = {}
+isBusy, firstSpawn, canPayFine, shouldDistressShown, text = false, true, false, true
+timer, isDead, isSearched, medic, isThreadRunning, isOnDuty, isInShopMenu = nil, false, false, 0, false, false, false
+deadPlayers, deadPlayerBlips = {}, {}
 
 RegisterNetEvent(Config.FrameworkEventsName..':playerLoaded')
 AddEventHandler(Config.FrameworkEventsName..':playerLoaded', function(xPlayer)

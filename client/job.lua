@@ -25,7 +25,7 @@ do
 				local zone = CircleZone:Create(vec(n.x, n.y, n.z), action.MarkerDrawDistance, {
 					name = RESOURCENAME..":"..v.HospitalName..":CircleZone:"..tostring(n),
 					useZ = true,
-					debugPoly = true
+					debugPoly = false
 				})
 				
 				points[zone] = {point = zone:getCenter(), zone = action, isInZone = false, type = k, name = v.HospitalName}
@@ -84,6 +84,10 @@ function RunThread()
 											TextUI('show', 'open_boss_menu', {hospital_name = v.name})
 										elseif v.type == 'Pharmacy' then
 											TextUI('show', 'open_pharmacy_menu', {hospital_name = v.name})
+										elseif v.type == 'CloakRoom' then
+											TextUI('show', 'open_cloakroom_menu', {hospital_name = v.name})
+										elseif v.type == 'Inventory' then
+											TextUI('show', 'open_inventory_menu', {hospital_name = v.name})
 										end
 										isTextUIShown = true
 										textUIIsBeingShownInK = k
@@ -92,6 +96,10 @@ function RunThread()
 										if v.type == 'BossAction' then
 											
 										elseif v.type == 'Pharmacy' then
+											OpenPharmacyMenu()
+										elseif v.type == 'CloakRoom' then
+											OpenCloakRoomMenu()
+										elseif v.type == 'Inventory' then
 											
 										end   
 									end
@@ -118,7 +126,7 @@ function RunThread()
 end
 
 if Config.Qtarget == true then
-	if GetResourceState('qtarget') == 'missing' then print('Q-Target Needs To Installed!') Config.Qtarget = false return end
+	if GetResourceState('qtarget') == 'missing' then print('Q-Target Needs To Be Installed!') Config.Qtarget = false return end
 	while GetResourceState('qtarget') ~= 'started' do Wait(100) end
 	local qtarget = exports['qtarget']
 	for _, v in pairs(Config.Zones) do
@@ -158,3 +166,218 @@ end)
 AddEventHandler('JLRP-Job-Ambulance:goOffDuty', function()
   TriggerServerEvent('JLRP-Job-Ambulance:goOffDuty')
 end)
+
+RegisterNetEvent('JLRP-Job-Ambulance:heal')
+AddEventHandler('JLRP-Job-Ambulance:heal', function(healType, quiet)
+	local playerPed = PlayerPedId()
+	local maxHealth = GetEntityMaxHealth(playerPed)
+
+	if healType == 'small' then
+		local health = GetEntityHealth(playerPed)
+		local newHealth = math.min(maxHealth, math.floor(health + maxHealth / 8))
+		SetEntityHealth(playerPed, newHealth)
+	elseif healType == 'big' then
+		SetEntityHealth(playerPed, maxHealth)
+	end
+
+	if not quiet then
+		Core.ShowNotification(_U('healed'))
+	end
+end)
+
+function OpenPharmacyMenu()
+	Core.UI.Menu.CloseAll()
+
+	Core.UI.Menu.Open('default', GetCurrentResourceName(), 'pharmacy', {
+		title    = _U('pharmacy_menu_title'),
+		align    = Config.MenuAlignment,
+		elements = {
+			{label = _U('pharmacy_take', _U('medikit')), item = 'medikit', type = 'slider', value = 1, min = 1, max = 20},
+			{label = _U('pharmacy_take', _U('bandage')), item = 'bandage', type = 'slider', value = 1, min = 1, max = 20}
+	}}, function(data, menu)
+		TriggerServerEvent('JLRP-Job-Ambulance:giveItem', data.current.item, data.current.value)
+	end, function(data, menu)
+		menu.close()
+	end)
+end
+
+function OpenCloakRoomMenu()
+	Core.UI.Menu.Open('default', GetCurrentResourceName(), 'cloakroom', {
+		title    = _U('cloakroom'),
+		align    = Config.MenuAlignment,
+		elements = {
+			{label = _U('ems_clothes_civil'), value = 'citizen_wear'},
+			{label = _U('ems_clothes_ems'), value = 'uniform'},
+	}}, function(data, menu)
+		if data.current.value == 'citizen_wear' then
+			Core.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
+				TriggerEvent('skinchanger:loadSkin', skin)
+			end)
+		elseif data.current.value == 'uniform' then
+			Core.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
+				if skin.sex == 0 then
+					TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_male)
+				else
+					TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_female)
+				end
+
+				TriggerEvent('JLRP-Job-Ambulance:setDeadPlayers', deadPlayers)
+			end)
+		end
+
+		menu.close()
+	end, function(data, menu)
+		menu.close()
+	end)
+end
+
+function OpenMobileAmbulanceActionsMenu()
+	if isOnDuty and not Core.PlayerData.dead then
+		Core.UI.Menu.CloseAll()
+
+		Core.UI.Menu.Open('default', GetCurrentResourceName(), 'mobile_ambulance_actions', {
+			title    = _U('ambulance'),
+			align    = Config.MenuAlignment,
+			elements = {
+				{label = _U('ems_menu'), value = 'citizen_interaction'}
+		}}, function(data, menu)
+			if data.current.value == 'citizen_interaction' then
+				Core.UI.Menu.Open('default', GetCurrentResourceName(), 'citizen_interaction', {
+					title    = _U('ems_menu_title'),
+					align    = Config.MenuAlignment,
+					elements = {
+						{label = _U('ems_menu_revive'), value = 'revive'},
+						{label = _U('ems_menu_small'), value = 'small'},
+						{label = _U('ems_menu_big'), value = 'big'},
+						{label = _U('ems_menu_putincar'), value = 'put_in_vehicle'},
+						{label = _U('ems_menu_search'), value = 'search'}
+				}}, function(data, menu)
+					if isBusy then return end
+
+					local closestPlayer, closestDistance = Core.Game.GetClosestPlayer()
+
+					if data.current.value == 'search' then
+						TriggerServerEvent('JLRP-Job-Ambulance:svsearch')
+					elseif closestPlayer == -1 or closestDistance > 1.0 then
+						Core.ShowNotification(_U('no_players'))
+					else
+						if data.current.value == 'revive' then
+							revivePlayer(closestPlayer)
+						elseif data.current.value == 'small' then
+							Core.TriggerServerCallback('JLRP-Job-Ambulance:getItemAmount', function(quantity)
+								if quantity > 0 then
+									local closestPlayerPed = GetPlayerPed(closestPlayer)
+									local health = GetEntityHealth(closestPlayerPed)
+
+									if health > 0 then
+										local playerPed = PlayerPedId()
+
+										isBusy = true
+										Core.ShowNotification(_U('heal_inprogress'))
+										TaskStartScenarioInPlace(playerPed, 'CODE_HUMAN_MEDIC_TEND_TO_DEAD', 0, true)
+										Wait(10000)
+										ClearPedTasks(playerPed)
+
+										TriggerServerEvent('JLRP-Job-Ambulance:removeItem', 'bandage')
+										TriggerServerEvent('JLRP-Job-Ambulance:heal', GetPlayerServerId(closestPlayer), 'small')
+										Core.ShowNotification(_U('heal_complete', GetPlayerName(closestPlayer)))
+										isBusy = false
+									else
+										Core.ShowNotification(_U('player_not_conscious'))
+									end
+								else
+									Core.ShowNotification(_U('not_enough_bandage'))
+								end
+							end, 'bandage')
+
+						elseif data.current.value == 'big' then
+
+							Core.TriggerServerCallback('JLRP-Job-Ambulance:getItemAmount', function(quantity)
+								if quantity > 0 then
+									local closestPlayerPed = GetPlayerPed(closestPlayer)
+									local health = GetEntityHealth(closestPlayerPed)
+
+									if health > 0 then
+										local playerPed = PlayerPedId()
+
+										isBusy = true
+										Core.ShowNotification(_U('heal_inprogress'))
+										TaskStartScenarioInPlace(playerPed, 'CODE_HUMAN_MEDIC_TEND_TO_DEAD', 0, true)
+										Wait(10000)
+										ClearPedTasks(playerPed)
+
+										TriggerServerEvent('JLRP-Job-Ambulance:removeItem', 'medikit')
+										TriggerServerEvent('JLRP-Job-Ambulance:heal', GetPlayerServerId(closestPlayer), 'big')
+										Core.ShowNotification(_U('heal_complete', GetPlayerName(closestPlayer)))
+										isBusy = false
+									else
+										Core.ShowNotification(_U('player_not_conscious'))
+									end
+								else
+									Core.ShowNotification(_U('not_enough_medikit'))
+								end
+							end, 'medikit')
+
+						elseif data.current.value == 'put_in_vehicle' then
+							TriggerServerEvent('JLRP-Job-Ambulance:putInVehicle', GetPlayerServerId(closestPlayer))
+						end
+					end
+				end, function(data, menu)
+					menu.close()
+				end)
+			end
+
+		end, function(data, menu)
+			menu.close()
+		end)
+	end
+end
+
+function revivePlayer(closestPlayer)
+	isBusy = true
+
+	Core.TriggerServerCallback('JLRP-Job-Ambulance:getItemAmount', function(quantity)
+		if quantity > 0 then
+			local closestPlayerPed = GetPlayerPed(closestPlayer)
+
+			if IsPedDeadOrDying(closestPlayerPed, 1) then
+				local playerPed = PlayerPedId()
+				local lib, anim = 'mini@cpr@char_a@cpr_str', 'cpr_pumpchest'
+				Core.ShowNotification(_U('revive_inprogress'))
+
+				for i = 1, 15 do
+					Wait(900)
+
+					Core.Streaming.RequestAnimDict(lib, function()
+						TaskPlayAnim(playerPed, lib, anim, 8.0, -8.0, -1, 0, 0.0, false, false, false)
+						RemoveAnimDict(lib)
+					end)
+				end
+
+				TriggerServerEvent('JLRP-Job-Ambulance:removeItem', 'medikit')
+				TriggerServerEvent('JLRP-Job-Ambulance:revive', GetPlayerServerId(closestPlayer))
+			else
+				Core.ShowNotification(_U('player_not_unconscious'))
+			end
+		else
+			Core.ShowNotification(_U('not_enough_medikit'))
+		end
+		isBusy = false
+	end, 'medikit')
+end
+
+if FRAMEWORKNAME == 'JLRP-Framework' then
+	AddEventHandler('onKeyUP', function(key)
+		if key == 'f6' then
+			OpenMobileAmbulanceActionsMenu()
+		end
+	end)
+else
+	RegisterCommand("ambulance", function(src)
+		if Core.PlayerData.job and AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] and not Core.PlayerData.dead then
+			OpenMobileAmbulanceActionsMenu()
+		end
+	end)
+	
+	RegisterKeyMapping("ambulance", "Open Ambulance Actions Menu", "keyboard", "F6")
+end

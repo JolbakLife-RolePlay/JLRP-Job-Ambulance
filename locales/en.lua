@@ -9,9 +9,46 @@ Locales['en'] = {
 
     ['open_boss_menu'] = '[E] - Open %s\'s Boss Menu',
     ['open_pharmacy_menu'] = '[E] - Open %s\'s Pharmacy Menu',
+    ['open_cloakroom_menu'] = '[E] - Open %s\'s Cloakroom Menu',
+    ['open_inventory_menu'] = '[E] - Open %s\'s Inventory',
 
     ['on_duty'] = '%s is now On-Duty as a %s',
     ['off_duty'] = '%s is now Off-Duty as a %s',
     ['already_onduty'] = 'You are already On-Duty!',
     ['already_offduty'] = 'You are already Off-Duty!',
+    
+    ['ems_clothes_civil'] = 'Civilian Clothes',
+    ['ems_clothes_ems'] = 'EMS Clothes',
+    ['revive_inprogress'] = 'A revive is in progress!',
+    ['revive_complete'] = 'You have revived %s',
+    ['revive_complete_award'] = 'You have revived %s and earned $%s!',
+    ['revive_fail_offline'] = 'That player is no longer online',
+    ['heal_inprogress'] = 'You are healing!',
+    ['heal_complete'] = 'You have healed %s',
+    ['no_players'] = 'No players nearby',
+    ['player_not_unconscious'] = 'That player is not unconscious!',
+    ['player_not_conscious'] = 'That player is not conscious!',
+    ['pharmacy_menu_title'] = 'Pharmacy',
+    ['pharmacy_take'] = 'Take <span style="color:blue;">%s</span>',
+    ['medikit'] = 'Medikit',
+    ['bandage'] = 'Bandage',
+    ['max_item'] = 'You are already carrying enough...',
+
+    ['ambulance'] = 'Ambulance',
+    ['ems_menu'] = 'EMS Menu',
+    ['ems_menu_title'] = 'Ambulance - EMS Menu',
+    ['ems_menu_revive'] = 'Revive Player',
+    ['ems_menu_putincar'] = 'Put in Vehicle',
+    ['ems_menu_small'] = 'Heal small wounds',
+    ['ems_menu_big'] = 'Treat serious injuries',
+    ['ems_menu_search'] = 'Patient not found',
+
+    ['revive_help'] = 'revive a player',
+
+    ['used_medikit'] = 'You have used 1x medikit',
+    ['used_bandage'] = 'You have used 1x bandage',
+    ['not_enough_medikit'] = 'You do not have medikit.',
+    ['not_enough_bandage'] = 'You do not have bandage.',
+    ['healed'] = 'You have been treated.',
+    ['blip_dead'] = 'Unconscious player'
 }

@@ -8,9 +8,10 @@ Core.RegisterCommand('reviveall', "superadmin", function(xPlayer, args, showErro
     local xPlayers = Core.GetExtendedPlayers()
     for _, xPlayer in pairs(xPlayers) do
         if xPlayer.metadata.dead == true then
-            TriggerClientEvent('JLRP-Job-Ambulance:revive', xPlayer.source)
+            xPlayer.triggerEvent('JLRP-Job-Ambulance:revive')
         else
             --TODO: Heal the player
+            xPlayer.triggerEvent('JLRP-Job-Ambulance:heal', 'big')
         end    
     end
 end, true)
