@@ -125,7 +125,7 @@ AddEventHandler('JLRP-Job-Ambulance:heal', function(target, type)
 	local xPlayer = Core.GetPlayerFromId(source)
 
 	if xPlayer then
-		if AuthorizedAmbulanceJobNames[xPlayer.job.name]  then
+		if AuthorizedAmbulanceJobNames[xPlayer.job.name] then
 			TriggerClientEvent('JLRP-Job-Ambulance:heal', target, type)
 		else
 			DropPlayer(xPlayer.source, "Cheater!")
@@ -139,7 +139,7 @@ AddEventHandler('JLRP-Job-Ambulance:revive', function(playerId)
 	local xPlayer = source and Core.GetPlayerFromId(source)
 
 	if xPlayer then
-		if AuthorizedAmbulanceJobNames[xPlayer.job.name]  then
+		if AuthorizedAmbulanceJobNames[xPlayer.job.name] then
 			local xTarget = Core.GetPlayerFromId(playerId)
 
 			if xTarget then
@@ -254,7 +254,16 @@ AddEventHandler('JLRP-Job-Ambulance:giveItem', function(itemName, amount)
 		end
 	
 		if xPlayer.canCarryItem(itemName, amount) then
-			xPlayer.addInventoryItem(itemName, amount)
+			if Config.ItemsLimit[itemName] then
+				local currentItemAmount = OX_INVENTORY:GetItem(xPlayer.source, itemName, { serial = string.upper(job.name) }, true)
+				if (currentItemAmount + amount) <= Config.ItemsLimit[itemName] then
+					xPlayer.addInventoryItem(itemName, amount, { serial = string.upper(job.name) })
+				else
+					xPlayer.showNotification(_U('too_much_item', _U(itemName), Config.ItemsLimit[itemName], currentItemAmount, _U(itemName), amount), 'info', 5000)
+				end
+			else
+				xPlayer.addInventoryItem(itemName, amount, { serial = string.upper(job.name) })
+			end
 		else
 			xPlayer.showNotification(_U('max_item'))
 		end
@@ -264,20 +273,32 @@ end)
 RegisterNetEvent('JLRP-Job-Ambulance:removeItem')
 AddEventHandler('JLRP-Job-Ambulance:removeItem', function(item)
 	local xPlayer = Core.GetPlayerFromId(source)
-	xPlayer.removeInventoryItem(item, 1)
-
-	if item == 'bandage' then
-		xPlayer.showNotification(_U('used_bandage'))
-	elseif item == 'medikit' then
-		xPlayer.showNotification(_U('used_medikit'))
+	if xPlayer then
+		local job = xPlayer.getJob()
+		if not AuthorizedAmbulanceJobNames[job.name] or job.onDuty == false then
+			DropPlayer(xPlayer.source, 'Possible Cheater!')
+		end
+		
+		xPlayer.removeInventoryItem(item, 1)
+		if item == 'bandage' then
+			xPlayer.showNotification(_U('used_bandage'))
+		elseif item == 'medikit' then
+			xPlayer.showNotification(_U('used_medikit'))
+		end
 	end
 end)
 
 Core.RegisterServerCallback('JLRP-Job-Ambulance:getItemAmount', function(source, cb, item)
 	local xPlayer = Core.GetPlayerFromId(source)
-	local quantity = xPlayer.getInventoryItem(item).count
+	if xPlayer then
+		local job = xPlayer.getJob()
+		if not AuthorizedAmbulanceJobNames[job.name] or job.onDuty == false then
+			DropPlayer(xPlayer.source, 'Possible Cheater!')
+		end
 
-	cb(quantity)
+		local quantity = xPlayer.getInventoryItem(item).count
+		cb(quantity)
+	end
 end)
 
 RegisterServerEvent('JLRP-Job-Ambulance:svsearch')
@@ -285,8 +306,17 @@ AddEventHandler('JLRP-Job-Ambulance:svsearch', function()
   TriggerClientEvent('JLRP-Job-Ambulance:clsearch', -1, source)
 end)
 
-if GetResourceState("esx_society") ~= 'missing' then
+if GetResourceState("JLRP-Society") ~= 'missing' then
 	for k, _ in pairs(AuthorizedAmbulanceJobNames) do
-		TriggerEvent('esx_society:registerSociety', AuthorizedAmbulanceJobNames[k], Config.Job[AuthorizedAmbulanceJobNames[k]].Label, 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], {type = 'public'})
+		TriggerEvent('JLRP-Society:registerSociety', AuthorizedAmbulanceJobNames[k], Config.Job[AuthorizedAmbulanceJobNames[k]].Label, 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], {type = 'public'})
 	end
 end
+
+AddEventHandler('onServerResourceStart', function(resourceName)
+	if resourceName == 'ox_inventory' or resourceName == RESOURCENAME then
+		for _, v in pairs(AuthorizedAmbulanceJobNames) do
+			local label = Config.Job[v] and Config.Job[v].Label or v:gsub("^%l", string.upper) -- make the first letter of job name capital if the label for job name doesn't exist on Config.Job
+			exports.ox_inventory:RegisterStash('society_'..v, label, 1000, 10000000, false, v)
+		end
+	end
+end)

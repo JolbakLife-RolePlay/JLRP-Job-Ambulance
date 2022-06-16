@@ -1,6 +1,7 @@
 FRAMEWORK = nil -- To Store the metadata of exports
 FRAMEWORKNAME = nil
 Core = nil
+OX_INVENTORY = exports.ox_inventory
 RESOURCENAME = GetCurrentResourceName()
 AuthorizedAmbulanceJobNames = {}
 do

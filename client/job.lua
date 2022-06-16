@@ -74,13 +74,23 @@ function RunThread()
 						for k, v in pairs(points) do
 							distance = #(v.point - PlayerCoords)
 							if v.isInZone == true and (distance <= v.zone.MarkerDrawDistance) then
-								DrawMarker(v.zone.MarkerType or 1, v.point.x, v.point.y, v.point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x or 1.5, v.zone.MarkerSize.y or 1.5, v.zone.MarkerSize.z or 1.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
-								if v.zone.EnableSecondaryMarker and v.zone.EnableSecondaryMarker == true and v.zone.MarkerType ~= 1 then
-									DrawMarker(1, v.point.x, v.point.y, v.point.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x + 1.0, v.zone.MarkerSize.y + 1.0, 0.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
+								if v.type == 'BossAction' then
+									if IsBoss() then
+										DrawMarker(v.zone.MarkerType or 1, v.point.x, v.point.y, v.point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x or 1.5, v.zone.MarkerSize.y or 1.5, v.zone.MarkerSize.z or 1.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
+										if v.zone.EnableSecondaryMarker and v.zone.EnableSecondaryMarker == true and v.zone.MarkerType ~= 1 then
+											DrawMarker(1, v.point.x, v.point.y, v.point.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x + 1.0, v.zone.MarkerSize.y + 1.0, 0.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
+										end
+									end
+								else
+									DrawMarker(v.zone.MarkerType or 1, v.point.x, v.point.y, v.point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x or 1.5, v.zone.MarkerSize.y or 1.5, v.zone.MarkerSize.z or 1.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
+									if v.zone.EnableSecondaryMarker and v.zone.EnableSecondaryMarker == true and v.zone.MarkerType ~= 1 then
+										DrawMarker(1, v.point.x, v.point.y, v.point.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x + 1.0, v.zone.MarkerSize.y + 1.0, 0.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
+									end
 								end
+								
 								if distance <= 1.5 and IsPedOnFoot(PlayerPed) then
 									if not isTextUIShown then
-										if v.type == 'BossAction' then
+										if v.type == 'BossAction' and IsBoss() then
 											TextUI('show', 'open_boss_menu', {hospital_name = v.name})
 										elseif v.type == 'Pharmacy' then
 											TextUI('show', 'open_pharmacy_menu', {hospital_name = v.name})
@@ -93,14 +103,14 @@ function RunThread()
 										textUIIsBeingShownInK = k
 									end
 									if IsControlJustReleased(0, 38) and not IsPedFatallyInjured(PlayerPed) then
-										if v.type == 'BossAction' then
-											
+										if v.type == 'BossAction' and IsBoss() then
+											OpenAmbulanceBossActionMenu()
 										elseif v.type == 'Pharmacy' then
 											OpenPharmacyMenu()
 										elseif v.type == 'CloakRoom' then
 											OpenCloakRoomMenu()
 										elseif v.type == 'Inventory' then
-											
+											OpenInventoryMenu()
 										end   
 									end
 								else
@@ -108,6 +118,7 @@ function RunThread()
 										TextUI('hide')
 										isTextUIShown = false
 										textUIIsBeingShownInK = nil
+										Core.UI.Menu.CloseAll()
 									end
 								end
 								
@@ -123,6 +134,20 @@ function RunThread()
 			end)
 		end
     end
+end
+
+function IsBoss()
+	local authorized = false
+	if FRAMEWORKNAME == 'JLRP-Framework' then
+		if Core.PlayerData.job and Core.PlayerData.job.is_boss == true then
+			authorized = true
+		end
+	else
+		if Core.PlayerData.job and Core.PlayerData.job.grade_name == 'boss' then
+			authorized = true
+		end
+	end
+	return authorized
 end
 
 if Config.Qtarget == true then
@@ -192,8 +217,8 @@ function OpenPharmacyMenu()
 		title    = _U('pharmacy_menu_title'),
 		align    = Config.MenuAlignment,
 		elements = {
-			{label = _U('pharmacy_take', _U('medikit')), item = 'medikit', type = 'slider', value = 1, min = 1, max = 20},
-			{label = _U('pharmacy_take', _U('bandage')), item = 'bandage', type = 'slider', value = 1, min = 1, max = 20}
+			{label = _U('pharmacy_take', _U('medikit')), item = 'medikit', type = 'slider', value = 1, min = 1, max = Config.ItemsLimit['medikit'] or 25},
+			{label = _U('pharmacy_take', _U('bandage')), item = 'bandage', type = 'slider', value = 1, min = 1, max = Config.ItemsLimit['bandage'] or 25}
 	}}, function(data, menu)
 		TriggerServerEvent('JLRP-Job-Ambulance:giveItem', data.current.item, data.current.value)
 	end, function(data, menu)
@@ -333,6 +358,19 @@ function OpenMobileAmbulanceActionsMenu()
 	end
 end
 
+function OpenAmbulanceBossActionMenu()
+	if IsBoss() and isOnDuty and not Core.PlayerData.dead then
+		Core.UI.Menu.CloseAll()
+		TriggerEvent('JLRP-Society:openBossMenu', Core.PlayerData.job.name, nil, {wash = false})
+	end
+end
+
+function OpenInventoryMenu()
+	if isOnDuty and not Core.PlayerData.dead then
+		OX_INVENTORY:openInventory('stash', 'society_'..Core.PlayerData.job.name)
+	end
+end
+
 function revivePlayer(closestPlayer)
 	isBusy = true
 
@@ -367,17 +405,65 @@ function revivePlayer(closestPlayer)
 end
 
 if FRAMEWORKNAME == 'JLRP-Framework' then
-	AddEventHandler('onKeyUP', function(key)
+	AddEventHandler('onKeyUp', function(key)
 		if key == 'f6' then
-			OpenMobileAmbulanceActionsMenu()
+			if Core.PlayerData.job and AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] then
+				OpenMobileAmbulanceActionsMenu()
+			end
 		end
 	end)
 else
 	RegisterCommand("ambulance", function(src)
-		if Core.PlayerData.job and AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] and not Core.PlayerData.dead then
+		if Core.PlayerData.job and AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] then
 			OpenMobileAmbulanceActionsMenu()
 		end
 	end)
 	
 	RegisterKeyMapping("ambulance", "Open Ambulance Actions Menu", "keyboard", "F6")
 end
+
+exports('bandage', function(data, slot)
+    local playerPed = PlayerPedId()
+    local maxHealth = GetEntityMaxHealth(playerPed)
+    local health = GetEntityHealth(playerPed)
+
+    if health < maxHealth then
+        -- Use the bandage
+        OX_INVENTORY:useItem(data, function(data)
+            -- The item has been used, so trigger the effects
+            if data then
+				local healthToAdd = 20
+				if health + healthToAdd <= maxHealth then
+					SetEntityHealth(playerPed, health + healthToAdd)
+				else
+					SetEntityHealth(playerPed, maxHealth)
+				end
+                OX_INVENTORY:notify({text = 'You feel better now'})
+            end
+        end)
+    else
+        -- Don't use the item
+        OX_INVENTORY:notify({type = 'error', text = 'You don\'t need a '.._U('bandage')..' right now'})
+    end
+end)
+
+exports('medikit', function(data, slot)
+    local playerPed = PlayerPedId()
+    local maxHealth = GetEntityMaxHealth(playerPed)
+    local health = GetEntityHealth(playerPed)
+	print(maxHealth, health)
+
+    if health < maxHealth then
+        -- Use the medikit
+        OX_INVENTORY:useItem(data, function(data)
+            -- The item has been used, so trigger the effects
+            if data then
+				SetEntityHealth(playerPed, maxHealth)
+                OX_INVENTORY:notify({text = 'You feel better now'})
+            end
+        end)
+    else
+        -- Don't use the item
+        OX_INVENTORY:notify({type = 'error', text = 'You don\'t need a '.._U('medikit')..' right now'})
+    end
+end)

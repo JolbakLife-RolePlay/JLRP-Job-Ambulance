@@ -313,6 +313,7 @@ function DeathThread()
             Wait(0)
         end
         isThreadRunning = false
+		isSearched = false
     end)
 end
 

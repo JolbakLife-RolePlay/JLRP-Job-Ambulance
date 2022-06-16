@@ -31,6 +31,11 @@ Config.RemoveCashAfterRPDeath = false
 
 Config.Qtarget = true
 
+Config.ItemsLimit = {
+    meditkit = 25,
+    bandage = 25
+}
+
 Config.Zones = {
     {
         HospitalName = 'City Hospital',
