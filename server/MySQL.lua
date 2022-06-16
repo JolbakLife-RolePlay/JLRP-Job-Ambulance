@@ -54,6 +54,8 @@ if Config.AutoAdjustDatabaseWithConfigJob then
                     end
                 end
 
+                
+                jobName = 'society_'..jobName
                 --society & addons & datastore
                 local addonAccountResult = MySQL.single.await('SELECT * FROM addon_account WHERE name = ?', { jobName })
                 if addonAccountResult then

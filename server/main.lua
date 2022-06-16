@@ -319,4 +319,10 @@ AddEventHandler('onServerResourceStart', function(resourceName)
 			exports.ox_inventory:RegisterStash('society_'..v, label, 1000, 10000000, false, v)
 		end
 	end
+	
+	if resourceName == 'JLRP-Society' or resourceName == RESOURCENAME then
+		for k, _ in pairs(AuthorizedAmbulanceJobNames) do
+			TriggerEvent('JLRP-Society:registerSociety', AuthorizedAmbulanceJobNames[k], Config.Job[AuthorizedAmbulanceJobNames[k]].Label, 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], 'society_'..AuthorizedAmbulanceJobNames[k], {type = 'public'})
+		end
+	end
 end)

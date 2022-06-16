@@ -143,7 +143,7 @@ if IsDuplicityVersion() then
                     AccessToBossMenu = false -- would only work if the framework is JLRP-Framework
                 },
                 ['5'] = {
-                    Name = 'chief', -- make sure the name for the highest rank MUST be 'boss'
+                    Name = 'chief',
                     Label = 'Chief',
                     Salary = 1350,
                     AccessToBossMenu = true -- would only work if the framework is JLRP-Framework

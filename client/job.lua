@@ -154,6 +154,10 @@ if Config.Qtarget == true then
 	if GetResourceState('qtarget') == 'missing' then print('Q-Target Needs To Be Installed!') Config.Qtarget = false return end
 	while GetResourceState('qtarget') ~= 'started' do Wait(100) end
 	local qtarget = exports['qtarget']
+	local jobs = {}
+	for _, v in pairs(AuthorizedAmbulanceJobNames) do
+		table.insert(jobs, v)
+	end
 	for _, v in pairs(Config.Zones) do
 		for _, p in pairs(v.OnOffDutyPositions) do
 			local name = RESOURCENAME..":"..tostring(v)..":qtarget:"..tostring(p)
@@ -176,7 +180,7 @@ if Config.Qtarget == true then
 							label = "Off Duty",
 						},
 					},
-					job = AuthorizedAmbulanceJobNames,
+					job = jobs,
 					distance = 1.5
 				}
 			)
@@ -185,11 +189,15 @@ if Config.Qtarget == true then
 end
 
 AddEventHandler('JLRP-Job-Ambulance:goOnDuty', function()
-  TriggerServerEvent('JLRP-Job-Ambulance:goOnDuty')
+	if AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] then
+		TriggerServerEvent('JLRP-Job-Ambulance:goOnDuty')
+	end
 end)
 
 AddEventHandler('JLRP-Job-Ambulance:goOffDuty', function()
-  TriggerServerEvent('JLRP-Job-Ambulance:goOffDuty')
+	if AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] then
+		TriggerServerEvent('JLRP-Job-Ambulance:goOffDuty')
+	end
 end)
 
 RegisterNetEvent('JLRP-Job-Ambulance:heal')
@@ -361,7 +369,7 @@ end
 function OpenAmbulanceBossActionMenu()
 	if IsBoss() and isOnDuty and not Core.PlayerData.dead then
 		Core.UI.Menu.CloseAll()
-		TriggerEvent('JLRP-Society:openBossMenu', Core.PlayerData.job.name, nil, {wash = false})
+		TriggerEvent('JLRP-Society:openBossMenu', Core.PlayerData.job.name, nil, {wash = false, grades = false})
 	end
 end
 
