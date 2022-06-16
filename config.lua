@@ -107,7 +107,7 @@ Config.Zones = {
 }
 
 if IsDuplicityVersion() then
-    Config.AutoAdjustDatabaseWithConfigJob = true --if set to true it automaticaly updates the database if any of Config.Job values change
+    Config.AutoAdjustDatabaseWithConfigJob = true --if set to true it automaticaly updates the database if any of Config.Job values change - SUGGESTED TO SET true!
     Config.Job = {
         ['ambulance'] = {
             Label = 'Ambulance',
