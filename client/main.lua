@@ -77,7 +77,7 @@ local function NewTimer()
 end
 
 function StartDeathTimer()
-	local earlyRespawnFineAmount = nil
+	local earlyRespawnFineAmount = Core.Math.GroupDigits(Config.EarlyRespawnFineAmount)
 	text = ""
 	timer = NewTimer()
 	
@@ -85,9 +85,7 @@ function StartDeathTimer()
 	LocalPlayer.state:set('bleedoutTimer', timer.bleedoutTimer, true)
 
 	if Config.EarlyRespawnFine then
-		if CanPayFine() then
-			earlyRespawnFineAmount = Core.Math.GroupDigits(Config.EarlyRespawnFineAmount)
-		end
+		CanPayFine()
 	end
 
 	CreateThread(function()

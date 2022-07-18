@@ -459,7 +459,6 @@ exports('medikit', function(data, slot)
     local playerPed = PlayerPedId()
     local maxHealth = GetEntityMaxHealth(playerPed)
     local health = GetEntityHealth(playerPed)
-	print(maxHealth, health)
 
     if health < maxHealth then
         -- Use the medikit

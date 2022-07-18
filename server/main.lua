@@ -38,7 +38,7 @@ if Config.EarlyRespawnFine then
 	AddEventHandler('JLRP-Job-Ambulance:payFine', function()
 		local xPlayer = Core.GetPlayerFromId(source)
 		if xPlayer then
-			if xPlayer.metadata.dead then 
+			if xPlayer.getMetadata().dead then 
 				local fineAmount = Config.EarlyRespawnFineAmount
 				
 				xPlayer.showNotification(_U('respawn_bleedout_fine_msg', Core.Math.GroupDigits(fineAmount)))
@@ -125,7 +125,7 @@ AddEventHandler('JLRP-Job-Ambulance:heal', function(target, type)
 	local xPlayer = Core.GetPlayerFromId(source)
 
 	if xPlayer then
-		if AuthorizedAmbulanceJobNames[xPlayer.job.name] then
+		if AuthorizedAmbulanceJobNames[xPlayer.getJob().name] then
 			TriggerClientEvent('JLRP-Job-Ambulance:heal', target, type)
 		else
 			DropPlayer(xPlayer.source, "Cheater!")
@@ -139,7 +139,7 @@ AddEventHandler('JLRP-Job-Ambulance:revive', function(playerId)
 	local xPlayer = source and Core.GetPlayerFromId(source)
 
 	if xPlayer then
-		if AuthorizedAmbulanceJobNames[xPlayer.job.name] then
+		if AuthorizedAmbulanceJobNames[xPlayer.getJob().name] then
 			local xTarget = Core.GetPlayerFromId(playerId)
 
 			if xTarget then

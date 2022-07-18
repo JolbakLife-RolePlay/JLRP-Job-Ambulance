@@ -8,7 +8,7 @@ Config.Notification = 'jlrp' -- valid values: 'jlrp' or 'ox_lib' or 'esx'
 Config.ProgressBar = 'ox_lib' -- valid values: 'jlrp' or 'ox_lib' or 'esx'
 Config.MenuAlignment = 'right'
 
-Config.EarlyRespawnTimer = 1  -- time(minute) till respawn is available
+Config.EarlyRespawnTimer = 0.1  -- time(minute) till respawn is available
 Config.BleedoutTimer = 10 -- time(minute) till the player bleeds out
 Config.DistressSignalToHospitalUnitsTimer = 1 -- time(minute) till the player can again send distress signal to available hospital units
 
@@ -16,6 +16,9 @@ Config.DistressSignalToHospitalUnitsTimer = 1 -- time(minute) till the player ca
 Config.EarlyRespawnFine = true
 Config.EarlyRespawnFineAmount = 5000
 Config.EarlyRespawnFineMoneyType = 'money' -- valid values : 'money or 'bank' or 'black_money'(not suggested)
+
+
+Config.ReviveReward = 300
 
 Config.RemoveItemsAfterRPDeath = true
 --[[ DON'T UNCOMMENT FOR NOW. WAITING FOR OX_INVENTORY TO BRING THIS FEATURE IN ClearInventory(inv, keep)
