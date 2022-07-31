@@ -7,11 +7,10 @@ end, true, {help = _U('revive_help'), validate = true, arguments = {
 Core.RegisterCommand('reviveall', "superadmin", function(xPlayer, args, showError)
     local xPlayers = Core.GetExtendedPlayers()
     for _, xPlayer in pairs(xPlayers) do
-        if xPlayer.metadata.dead == true then
+        if xPlayer.getMetadata('dead') == true then
             xPlayer.triggerEvent('JLRP-Job-Ambulance:revive')
         else
-            --TODO: Heal the player
             xPlayer.triggerEvent('JLRP-Job-Ambulance:heal', 'big')
         end    
     end
-end, true)
+end, true, {help = _U('revive_all_help')})

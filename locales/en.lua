@@ -6,6 +6,7 @@ Locales['en'] = {
     ['respawn_bleedout_prompt'] = 'Hold ~g~[E]~s~ to respawn',
     ['respawn_bleedout_fine'] = 'Hold ~g~[E]~s~ to respawn for ~g~$%s~s~',
     ['respawn_bleedout_fine_msg'] = 'You paid $%s to respawn.',
+	['killed_by_player'] = '\nYou got killed by %s (ID : %s)',
 
     ['open_boss_menu'] = '[E] - Open %s\'s Boss Menu',
     ['open_pharmacy_menu'] = '[E] - Open %s\'s Pharmacy Menu',
@@ -47,6 +48,7 @@ Locales['en'] = {
     ['ems_menu_search'] = 'Patient not found',
 
     ['revive_help'] = 'revive a player',
+	['revive_all_help'] = 'revive all dead players and heal the rest',
 
     ['used_medikit'] = 'You have used 1x medikit',
     ['used_bandage'] = 'You have used 1x bandage',

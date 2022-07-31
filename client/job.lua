@@ -17,6 +17,11 @@ do
             EndTextCommandSetBlipName(blip)
         end
 
+		if type(v.AuthorizedJobNames) == 'string' then
+			local _temp = v.Type
+			v.AuthorizedJobNames = {}
+			v.AuthorizedJobNames[1] = _temp
+		end
 
 		for k, action in pairs(v.Markers) do
 			action.MarkerDrawDistance = action.MarkerDrawDistance and (action.MarkerDrawDistance + 0.0) or 20.0
@@ -28,7 +33,7 @@ do
 					debugPoly = false
 				})
 				
-				points[zone] = {point = zone:getCenter(), zone = action, isInZone = false, type = k, name = v.HospitalName}
+				points[zone] = {point = zone:getCenter(), zone = action, isInZone = false, type = k, name = v.HospitalName, jobs = v.AuthorizedJobNames}
 
 				zone:onPointInOut(PolyZone.getPlayerPosition, function(isPointInside)
 					points[zone].isInZone = isPointInside
@@ -37,14 +42,7 @@ do
 						RunThread()
 					end
 				end, 2000)
-
 			end
-		end     
-        
-        if type(v.AuthorizedJobNames) == 'string' then
-			local _temp = v.Type
-			v.AuthorizedJobNames = {}
-			v.AuthorizedJobNames[1] = _temp
 		end
     end
 end
@@ -58,6 +56,15 @@ function IsInAnyZone()
     return false
 end
 
+function CanPlayerInteractWithThisZone(zone)
+	for i = 1, #zone?.jobs, 1 do
+		if zone.jobs[i] == Core.PlayerData.job.name then
+			return true
+		end
+	end
+	return false
+end
+
 function RunThread()
     if not isThreadActive then
 		if AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] and isInAnyZone and isOnDuty then
@@ -67,13 +74,16 @@ function RunThread()
 				local PlayerPed
 				local PlayerCoords
 				local distance
+				local sleep = 1000
 				while isInAnyZone and AuthorizedAmbulanceJobNames[Core.PlayerData.job.name] and isOnDuty do
 					PlayerPed = PlayerPedId()
 					PlayerCoords = GetEntityCoords(PlayerPed)
+					sleep = 1000
 					if not Core.PlayerData.dead then
 						for k, v in pairs(points) do
 							distance = #(v.point - PlayerCoords)
-							if v.isInZone == true and (distance <= v.zone.MarkerDrawDistance) then
+							if v.isInZone == true and (distance <= v.zone.MarkerDrawDistance) and CanPlayerInteractWithThisZone(v) then
+								sleep = 0
 								if v.type == 'BossAction' then
 									if IsBoss() then
 										DrawMarker(v.zone.MarkerType or 1, v.point.x, v.point.y, v.point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.zone.MarkerSize.x or 1.5, v.zone.MarkerSize.y or 1.5, v.zone.MarkerSize.z or 1.5, v.zone.MarkerRGB.r or 255, v.zone.MarkerRGB.g or 255, v.zone.MarkerRGB.b or 255, 50, false, true, 2, nil, nil, false)
@@ -89,6 +99,9 @@ function RunThread()
 								end
 								
 								if distance <= 1.5 and IsPedOnFoot(PlayerPed) then
+									if v.zone.EnableTextOnMarker then
+										Core.Game.Utils.DrawText3D(vector3(v.point.x, v.point.y, v.point.z + (v.zone.MarkerSize.z - 0.5) or 0.5), v.type, nil, nil, v.zone.MarkerRGB.r, v.zone.MarkerRGB.g, v.zone.MarkerRGB.b, 200)
+									end
 									if not isTextUIShown then
 										if v.type == 'BossAction' and IsBoss() then
 											TextUI('show', 'open_boss_menu', {hospital_name = v.name})
@@ -121,13 +134,12 @@ function RunThread()
 										Core.UI.Menu.CloseAll()
 									end
 								end
-								
 							end
 						end
 					else
-						Wait(2000)
+						sleep = 2000
 					end
-					Wait(0)
+					Wait(sleep)
 				end
 				isThreadActive = false
 				if isTextUIShown then TextUI('hide') end
@@ -156,7 +168,7 @@ if Config.Qtarget == true then
 	local qtarget = exports['qtarget']
 	local jobs = {}
 	for _, v in pairs(AuthorizedAmbulanceJobNames) do
-		table.insert(jobs, v)
+		jobs[v] = 0
 	end
 	for _, v in pairs(Config.Zones) do
 		for _, p in pairs(v.OnOffDutyPositions) do
@@ -173,14 +185,15 @@ if Config.Qtarget == true then
 							event = "JLRP-Job-Ambulance:goOnDuty",
 							icon = "far fa-clipboard",
 							label = "On Duty",
+							job = jobs,
 						},
 						{
 							event = "JLRP-Job-Ambulance:goOffDuty",
 							icon = "far fa-clipboard",
 							label = "Off Duty",
+							job = jobs,
 						},
 					},
-					job = jobs,
 					distance = 1.5
 				}
 			)

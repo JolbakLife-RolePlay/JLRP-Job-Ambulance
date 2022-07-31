@@ -32,6 +32,7 @@ AddEventHandler(Config.FrameworkEventsName..':onPlayerSpawn', function()
 	end
 end)
 
+local extraInfo
 function OnPlayerDeath()
 	isDead = true
 	Core.UI.Menu.CloseAll()
@@ -46,6 +47,7 @@ function OnPlayerDeath()
 end
 
 AddEventHandler(Config.FrameworkEventsName..':onPlayerDeath', function(data)
+	extraInfo = data
 	OnPlayerDeath()
 end)
 
@@ -91,6 +93,7 @@ function StartDeathTimer()
 	CreateThread(function()
 		-- early respawn timer
 		local loop = 0
+		
 		while timer.earlySpawnTimer > 0 and isDead do
 			Wait(1000)
 			loop = loop + 1
@@ -99,6 +102,7 @@ function StartDeathTimer()
 				loop = 0
 				LocalPlayer.state:set('earlySpawnTimer', timer.earlySpawnTimer, true)
 			end
+			
 			
 			text = _U('respawn_available_in', secondsToClock(timer.earlySpawnTimer))
 		end
@@ -120,7 +124,7 @@ function StartDeathTimer()
 			if not Config.EarlyRespawnFine then
 				text = text .. _U('respawn_bleedout_prompt')
 			elseif Config.EarlyRespawnFine and canPayFine then
-				text = text .. _U('respawn_bleedout_fine', earlyRespawnFineAmount)
+				text = text .. '%ss - ' .. _U('respawn_bleedout_fine', earlyRespawnFineAmount)
 			end
 		end
 		timer.bleedoutTimer = 0
@@ -237,14 +241,21 @@ function DeathThread()
     if isThreadRunning then return end
     isThreadRunning = true
 	shouldDistressShown = true
+	
     CreateThread(function()
 		local timeHeld
-
-        while isDead do
+		local extraInfoToShow = extraInfo.killedByPlayer == true and _U('killed_by_player', GetPlayerServerId(PlayerId()) ~= extraInfo.killerServerId and GetPlayerName(GetPlayerFromServerId(extraInfo.killerServerId)) or "Yourself", extraInfo.killerServerId) or nil
+        local timeMustHold = 5000
+		while isDead do
             DisableAllControlActions(0)
 			EnableControlAction(0, 47, true)
 			EnableControlAction(0, 245, true)
 			EnableControlAction(0, 38, true)
+			
+			EnableControlAction(0, 199, true)
+			EnableControlAction(0, 200, true)
+			EnableControlAction(0, 202, true)
+			EnableControlAction(0, 322, true)
 
 			if isSearched then
 				local playerPed = PlayerPedId()
@@ -265,31 +276,33 @@ function DeathThread()
 				AddTextComponentSubstringPlayerName(text)
 				EndTextCommandDisplayText(0.5, 0.8)
 			elseif timer.bleedoutTimer > 0 then
+				
+				if IsControlPressed(0, 38) then
+					timeHeld = timeHeld + 10
+				else
+					timeHeld = 0
+				end
 
 				if not Config.EarlyRespawnFine then
 
-					if IsControlPressed(0, 38) and timeHeld > 60 then
+					if IsControlPressed(0, 38) and timeHeld >= timeMustHold then
 						RemoveItemsAfterRPDeath()
 						break
 					end
 				elseif Config.EarlyRespawnFine and canPayFine then
 
-					if IsControlPressed(0, 38) and timeHeld > 60 then
+					if IsControlPressed(0, 38) and timeHeld >= timeMustHold then
 						TriggerServerEvent('JLRP-Job-Ambulance:payFine')
 						RemoveItemsAfterRPDeath()
 						break
 					end
 				end
 
-				if IsControlPressed(0, 38) then
-					timeHeld = timeHeld + 1
-				else
-					timeHeld = 0
-				end
-
+				
+				
 				DrawGenericTextThisFrame(true)
 				BeginTextCommandDisplayText('STRING')
-				AddTextComponentSubstringPlayerName(text)
+			AddTextComponentSubstringPlayerName(string.find(text, '%s', 1, true) and text:format(string.format("%.2f", (timeMustHold - timeHeld) / 1000)) or text)
 				EndTextCommandDisplayText(0.5, 0.8)
 			elseif timer.bleedoutTimer < 1 then
 				RemoveItemsAfterRPDeath()
@@ -308,6 +321,12 @@ function DeathThread()
 				end
 			end
 			
+			if extraInfoToShow then
+				DrawGenericTextThisFrame(false, true)
+				BeginTextCommandDisplayText('STRING')
+				AddTextComponentSubstringPlayerName(extraInfoToShow)
+				EndTextCommandDisplayText(0.5, 0.93)
+			end
             Wait(0)
         end
         isThreadRunning = false
