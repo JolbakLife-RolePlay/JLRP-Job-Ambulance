@@ -230,6 +230,7 @@ end
 function RespawnPed(ped, coords, heading)
 	SetEntityCoordsNoOffset(ped, coords.x, coords.y, coords.z, false, false, false)
 	NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, heading, true, false)
+	ped = PlayerPedId()
 	SetPlayerInvincible(ped, false)
 	ClearPedBloodDamage(ped)
 
