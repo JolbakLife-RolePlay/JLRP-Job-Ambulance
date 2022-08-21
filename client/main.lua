@@ -248,13 +248,20 @@ function DeathThread()
 		local extraInfoToShow = extraInfo.killedByPlayer == true and _U('killed_by_player', GetPlayerServerId(PlayerId()) ~= extraInfo.killerServerId and GetPlayerName(GetPlayerFromServerId(extraInfo.killerServerId)) or "Yourself", extraInfo.killerServerId) or nil
         local timeMustHold = 5000
 		while isDead do
-            DisableAllControlActions(0)
+			DisableAllControlActions(0)
+			DisableAllControlActions(1)
+			DisableAllControlActions(2)
 			EnableControlAction(0, 47, true)
 			EnableControlAction(0, 245, true)
 			EnableControlAction(0, 38, true)
 			
 			EnableControlAction(0, 199, true)
 			EnableControlAction(0, 200, true)
+			EnableControlAction(1, 199, true)
+			EnableControlAction(1, 200, true)
+			EnableControlAction(2, 199, true)
+			EnableControlAction(2, 200, true)
+
 			EnableControlAction(0, 202, true)
 			EnableControlAction(0, 322, true)
 
@@ -303,7 +310,7 @@ function DeathThread()
 				
 				DrawGenericTextThisFrame(true)
 				BeginTextCommandDisplayText('STRING')
-			AddTextComponentSubstringPlayerName(string.find(text, '%s', 1, true) and text:format(string.format("%.2f", (timeMustHold - timeHeld) / 1000)) or text)
+				AddTextComponentSubstringPlayerName(string.find(text, '%s', 1, true) and text:format(string.format("%.2f", (timeMustHold - timeHeld) / 1000)) or text)
 				EndTextCommandDisplayText(0.5, 0.8)
 			elseif timer.bleedoutTimer < 1 then
 				RemoveItemsAfterRPDeath()

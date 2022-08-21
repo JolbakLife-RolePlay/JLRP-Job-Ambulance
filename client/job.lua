@@ -24,24 +24,26 @@ do
 		end
 
 		for k, action in pairs(v.Markers) do
-			action.MarkerDrawDistance = action.MarkerDrawDistance and (action.MarkerDrawDistance + 0.0) or 20.0
-			for _, n in pairs(action.MarkerPositions) do
-				
-				local zone = CircleZone:Create(vec(n.x, n.y, n.z), action.MarkerDrawDistance, {
-					name = RESOURCENAME..":"..v.HospitalName..":CircleZone:"..tostring(n),
-					useZ = true,
-					debugPoly = false
-				})
-				
-				points[zone] = {point = zone:getCenter(), zone = action, isInZone = false, type = k, name = v.HospitalName, jobs = v.AuthorizedJobNames}
+			if action.Enable == nil or action.Enable == true then
+				action.MarkerDrawDistance = action.MarkerDrawDistance and (action.MarkerDrawDistance + 0.0) or 20.0
+				for _, n in pairs(action.MarkerPositions) do
+					
+					local zone = CircleZone:Create(vec(n.x, n.y, n.z), action.MarkerDrawDistance, {
+						name = RESOURCENAME..":"..v.HospitalName..":CircleZone:"..tostring(n),
+						useZ = true,
+						debugPoly = false
+					})
+					
+					points[zone] = {point = zone:getCenter(), zone = action, isInZone = false, type = k, name = v.HospitalName, jobs = v.AuthorizedJobNames}
 
-				zone:onPointInOut(PolyZone.getPlayerPosition, function(isPointInside)
-					points[zone].isInZone = isPointInside
-					isInAnyZone = IsInAnyZone()
-					if isPointInside then
-						RunThread()
-					end
-				end, 2000)
+					zone:onPointInOut(PolyZone.getPlayerPosition, function(isPointInside)
+						points[zone].isInZone = isPointInside
+						isInAnyZone = IsInAnyZone()
+						if isPointInside then
+							RunThread()
+						end
+					end, 2000)
+				end
 			end
 		end
     end
@@ -176,9 +178,9 @@ if Config.Qtarget == true then
 			qtarget:AddBoxZone(name, vec(p.x, p.y, p.z), 0.5, 0.5, {
 				name = name,
 				heading = p.h,
-				debugPoly = false,
-				minZ = p.z - 0.2,
-				maxZ = p.z + 0.2
+				debugPoly = true,
+				minZ = p.z - 0.25,
+				maxZ = p.z + 0.25
 				}, {
 					options = {
 						{

@@ -41,7 +41,7 @@ Config.ItemsLimit = {
 
 Config.Zones = {
     {
-        HospitalName = 'City Hospital',
+        HospitalName = 'Pillbox Hill Hospital',
         AuthorizedJobNames = {'ambulance'},    
         Blip = {
             Enable = true,
@@ -77,7 +77,7 @@ Config.Zones = {
 				EnableTextOnMarker = true,
             },
             CloakRoom = {
-                Enable = false,
+                Enable = true,
                 MarkerPositions = {                  
                     {x = 298.85, y = -598.41, z = 43.28},
                     {x = 301.75, y = -599.28, z = 43.28}
@@ -106,6 +106,94 @@ Config.Zones = {
             {x = 307.544, y = -595.23, z = 43.1, h = 76.5},
             {x = 311.917, y = -593.36, z = 43.1, h = 346.633},
             {x = 350.411, y = -587.646, z = 28.7, h = 287.016}
+        },
+        RespawnPositions = {
+            {x = 341.0, y = -1397.3, z = 32.5, h = 48.5}
+        }
+    },
+	{
+        HospitalName = 'Mount Zonah Hospital',
+        AuthorizedJobNames = {'ambulance'},    
+        Blip = {
+            Enable = true,
+            Type = 61,
+            Colour = 0,
+            Size = 1.0,
+            Position = {x = -440.29, y = -325.70, z = 34.9}
+        },
+        Markers = {
+            BossAction = {
+                Enable = true,
+                MarkerPositions = {
+                    {x = 334.61, y = -594.34, z = 43.2}
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 255, g = 50, b = 50},
+                MarkerDrawDistance = 5.0,
+                MarkerType = 22,
+                EnableSecondaryMarker = false,
+				EnableTextOnMarker = true,
+            },
+            Pharmacy = {
+                Enable = true,
+                MarkerPositions = {
+                    {x = -491.47, y = -339.85, z = 42.3},
+					
+					{x = -455.47, y = -284.14, z = -130.89},
+					{x = -463.43, y = -284.86, z = -130.89},
+					
+					{x = -453.77, y = -311.8, z = -130.89},
+					{x = -457.83, y = -313.57, z = -130.89},
+					
+					{x = -465.1, y = -293.92, z = 34.9},
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 50, g = 50, b = 255},
+                MarkerDrawDistance = 10.0,
+                MarkerType = 20,
+                EnableSecondaryMarker = false,
+				EnableTextOnMarker = true,
+            },
+            CloakRoom = {
+                Enable = true,
+                MarkerPositions = {                  
+                    {x = -504.75, y = -298.68, z = 69.51},
+					{x = -437.88, y = -308.75, z = 34.9},
+					{x = -443.39, y = -311.26, z = 34.9},
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 50, g = 50, b = 255},
+                MarkerDrawDistance = 5.0,
+                MarkerType = 20,
+                EnableSecondaryMarker = false,
+				EnableTextOnMarker = true,
+            },
+            Inventory = {
+                Enable = true,
+                MarkerPositions = {                  
+                    {x = 306.83, y = -601.61, z = 43.28},
+                },
+                MarkerSize = {x = 1.5, y = 1.5, z = 1.0},
+                MarkerRGB = {r = 255, g = 0, b = 255},
+                MarkerDrawDistance = 6.0,
+                MarkerType = 20,
+                EnableSecondaryMarker = false,
+				EnableTextOnMarker = true,
+            },
+        },
+        OnOffDutyPositions = {
+            {x = -508.55, y = -300.7, z = 69.72, h = 20.0},
+			{x = -509.2, y = -300.8, z = 69.72, h = 20.0},
+			
+			{x = -498.56, y = -332.49, z = 42.53, h = 00.0},
+			{x = -501.39, y = -330.24, z = 42.53, h = 00.0},
+			{x = -503.75, y = -333.06, z = 42.53, h = 00.0},
+			
+			{x = -433.93, y = -325.5, z = 35.11, h = 335.0},
+			{x = -436.85, y = -324.45, z = 35.11, h = 335.0},
+			
+			{x = -459.51, y = -292.05, z = 35.11, h = 20.0},
+			{x = -437.83, y = -316.33, z = 34.91, h = 345.0},
         },
         RespawnPositions = {
             {x = 341.0, y = -1397.3, z = 32.5, h = 48.5}
